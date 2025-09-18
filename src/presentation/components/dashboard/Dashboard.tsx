@@ -7,6 +7,7 @@ import { useFinance } from '@/src/presentation/hooks/useFinance';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
+import SuggestionPanel from '@/src/presentation/components/suggestions/SuggestionPanel';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -142,6 +143,9 @@ const Dashboard: React.FC = () => {
             </div>
           </Card>
         </div>
+
+        {/* Suggestions intelligentes */}
+        <SuggestionPanel className="mb-8" maxSuggestions={3} />
 
         {/* Quick Actions */}
         <Card shadow="lg">

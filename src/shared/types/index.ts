@@ -7,6 +7,19 @@ export interface User {
 }
 
 // Habit types
+export interface Routine {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  type: 'morning' | 'evening' | 'custom';
+  habitIds: string[]; // Habitudes dans l'ordre d'exécution
+  estimatedDuration: number; // en minutes
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface HabitSchedule {
   day: string; // 'monday', 'tuesday', etc. or 'daily' for every day
   times: string[]; // Array of time strings like ['09:30', '22:00']
@@ -27,6 +40,11 @@ export interface Habit {
   schedules?: HabitSchedule[]; // Horaires détaillés par jour
   // Ou horaires simples pour toute la semaine
   dailyTimes?: string[]; // Pour frequency='daily' avec horaires fixes
+  // Intégration financière
+  hasFinancialImpact: boolean;
+  estimatedCostPerOccurrence?: number; // Pour mauvaises habitudes
+  savingsGoalId?: string; // Objectif d'épargne lié
+  routineIds?: string[]; // Routines auxquelles cette habitude appartient
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,6 +124,27 @@ export interface TaskTimeEntry {
 }
 
 // Finance types
+export interface AccountRule {
+  id: string;
+  userId: string;
+  sourceAccountId: string;
+  destinationAccountId: string;
+  name: string;
+  description?: string;
+  type: 'percentage' | 'fixed_amount';
+  value: number; // Pourcentage (0-100) ou montant fixe
+  triggerType: 'on_income' | 'on_expense' | 'scheduled';
+  frequency?: 'daily' | 'weekly' | 'monthly'; // Pour scheduled
+  nextExecutionDate?: Date; // Pour scheduled
+  minAmount?: number; // Montant minimum pour déclencher la règle
+  maxAmount?: number; // Montant maximum de transfert
+  isActive: boolean;
+  lastExecutedAt?: Date;
+  executionCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Account {
   id: string;
   userId: string;
@@ -120,6 +159,7 @@ export interface Account {
   color?: string; // Pour l'interface utilisateur
   icon?: string;
   isActive: boolean;
+  linkedRules?: string[]; // IDs des règles de liaison
   createdAt: Date;
   updatedAt: Date;
 }
@@ -210,5 +250,127 @@ export interface FinancialReport {
   accountBalances: {
     accountId: string;
     balance: number;
+  }[];
+  savingsRate: number;
+  budgetCompliance: {
+    category: string;
+    budgeted: number;
+    spent: number;
+    compliance: number;
+  }[];
+  goalsProgress: {
+    goalId: string;
+    progress: number;
+    projected: Date;
+  }[];
+  habitImpact: {
+    habitId: string;
+    savingsGenerated: number;
+  }[];
+}
+
+// Système de gamification
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  type: 'habit' | 'task' | 'finance' | 'streak' | 'achievement';
+  criteria: {
+    type: string;
+    value: number;
+    period?: string;
+  };
+}
+
+export interface UserBadge {
+  id: string;
+  userId: string;
+  badgeId: string;
+  earnedAt: Date;
+  notificationSent: boolean;
+}
+
+export interface UserStats {
+  id: string;
+  userId: string;
+  totalPoints: number;
+  level: number;
+  streakDays: number;
+  longestStreak: number;
+  habitsCompleted: number;
+  tasksCompleted: number;
+  budgetsRespected: number;
+  goalsAchieved: number;
+  lastUpdated: Date;
+}
+
+// Système de suggestions
+export interface Suggestion {
+  id: string;
+  userId: string;
+  type: 'transfer' | 'budget_alert' | 'habit_reward' | 'task_organization' | 'goal_contribution';
+  title: string;
+  description: string;
+  data: any; // Données spécifiques à la suggestion
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+  expiresAt?: Date;
+  createdAt: Date;
+}
+
+// Notifications
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'suggestion' | 'alert' | 'reminder' | 'achievement' | 'budget_warning';
+  title: string;
+  message: string;
+  data?: any;
+  isRead: boolean;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: Date;
+}
+
+// Rapports avancés
+export interface ImpactReport {
+  habitId: string;
+  habitName: string;
+  period: 'week' | 'month' | 'quarter';
+  startDate: Date;
+  endDate: Date;
+  completionRate: number;
+  financialImpact: {
+    savedAmount: number;
+    transferredToGoals: number;
+    budgetImpact: number;
+  };
+  correlatedExpenses: {
+    category: string;
+    changeAmount: number;
+    changePercentage: number;
+  }[];
+}
+
+export interface PerformanceReport {
+  period: 'week' | 'month' | 'quarter';
+  startDate: Date;
+  endDate: Date;
+  taskStats: {
+    total: number;
+    completed: number;
+    postponed: number;
+    cancelled: number;
+    completionRate: number;
+  };
+  procrastinationPatterns: {
+    mostPostponedCategories: string[];
+    averageDelayDays: number;
+    timeOfDayPatterns: { hour: number; tasks: number }[];
+  };
+  productivityTrends: {
+    date: Date;
+    tasksCompleted: number;
+    timeSpent: number;
   }[];
 }

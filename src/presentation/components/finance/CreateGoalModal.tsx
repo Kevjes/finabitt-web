@@ -150,7 +150,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
                     ? 'ring-2 ring-primary bg-primary/5'
                     : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-                onClick={() => setFormData({ ...formData, type: type.value })}
+                onClick={() => setFormData({ ...formData, type: type.value as Goal['type'] })}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">{type.icon}</span>

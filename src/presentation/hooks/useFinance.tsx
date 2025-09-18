@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { FinanceRepository } from '@/src/data/repositories/financeRepository';
 import { Account, Transaction, TransactionCategory, Budget, Goal } from '@/src/shared/types';
+import { useAccountRules } from './useAccountRules';
 
 const financeRepository = new FinanceRepository();
 
@@ -16,6 +17,8 @@ export const useFinance = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { getTriggerableRules, executeRule } = useAccountRules();
 
   // Charger toutes les données financières
   const loadFinanceData = async () => {
@@ -148,6 +151,11 @@ export const useFinance = () => {
 
       setTransactions(prevTransactions => [createdTransaction, ...prevTransactions]);
 
+      // Déclencher les règles automatiques si la transaction est complétée
+      if (newTransaction.status === 'completed') {
+        await triggerAccountRules(createdTransaction);
+      }
+
       // Recharger pour mettre à jour les soldes
       setTimeout(async () => {
         await loadFinanceData();
@@ -158,6 +166,47 @@ export const useFinance = () => {
       setError('Erreur lors de la création de la transaction');
       console.error('Error creating transaction:', err);
       return false;
+    }
+  };
+
+  // Fonction pour déclencher les règles automatiques
+  const triggerAccountRules = async (transaction: Transaction) => {
+    try {
+      let triggerType: 'on_income' | 'on_expense' | null = null;
+      let accountId: string | null = null;
+
+      if (transaction.type === 'income' && transaction.destinationAccountId) {
+        triggerType = 'on_income';
+        accountId = transaction.destinationAccountId;
+      } else if (transaction.type === 'expense' && transaction.sourceAccountId) {
+        triggerType = 'on_expense';
+        accountId = transaction.sourceAccountId;
+      }
+
+      if (triggerType && accountId) {
+        const applicableRules = getTriggerableRules(accountId, triggerType, transaction.amount);
+
+        for (const rule of applicableRules) {
+          try {
+            const result = await executeRule(
+              rule.id,
+              transaction.amount,
+              rule.sourceAccountId,
+              rule.destinationAccountId
+            );
+
+            if (result.executed) {
+              console.log(`Règle "${rule.name}" exécutée: ${result.transferAmount}€ transférés`);
+            }
+          } catch (ruleError) {
+            console.error(`Erreur lors de l'exécution de la règle ${rule.name}:`, ruleError);
+            // Ne pas faire échouer la transaction principale pour une erreur de règle
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du déclenchement des règles automatiques:', error);
+      // Ne pas faire échouer la transaction principale
     }
   };
 

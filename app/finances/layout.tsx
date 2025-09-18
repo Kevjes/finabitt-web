@@ -16,6 +16,7 @@ export default function FinanceLayout({
     { href: '/finances/accounts', label: 'Comptes', icon: '🏦' },
     { href: '/finances/transactions', label: 'Transactions', icon: '💳' },
     { href: '/finances/budgets', label: 'Budgets & Objectifs', icon: '🎯' },
+    { href: '/finances/rules', label: 'Règles de liaison', icon: '🔗' },
   ];
 
   return (

@@ -188,7 +188,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, showCategory = true }) => {
             {task.status === 'in_progress' && (
               <Button
                 size="sm"
-                variant="success"
+                variant="primary"
                 onClick={() => handleStatusChange('completed')}
                 isLoading={isLoading}
               >

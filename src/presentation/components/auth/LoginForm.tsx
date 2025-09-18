@@ -43,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           label="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(value) => setEmail(value)}
           required
           autoComplete="email"
         />
@@ -52,7 +52,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           label="Mot de passe"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(value) => setPassword(value)}
           required
           autoComplete="current-password"
         />

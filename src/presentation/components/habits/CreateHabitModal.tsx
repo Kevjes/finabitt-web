@@ -242,7 +242,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Input
               label="Nom de l'habitude *"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
               error={errors.name}
               placeholder="ex: Lire 10 pages par jour"
               required
@@ -251,7 +251,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Textarea
               label="Description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
               placeholder="Décrivez votre habitude (optionnel)"
               rows={3}
             />
@@ -259,7 +259,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Select
               label="Type d'habitude *"
               value={formData.type}
-              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'good' | 'bad' }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, type: value as 'good' | 'bad' }))}
               options={typeOptions}
               required
             />
@@ -267,7 +267,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Select
               label="Fréquence *"
               value={formData.frequency}
-              onChange={(e) => setFormData(prev => ({ ...prev, frequency: e.target.value as any }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, frequency: value as any }))}
               options={frequencyOptions}
               required
             />
@@ -302,7 +302,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Input
               label="Objectif"
               value={formData.target}
-              onChange={(e) => setFormData(prev => ({ ...prev, target: e.target.value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, target: value }))}
               placeholder="ex: 10 pages, 30 minutes, 5 verres d'eau"
               helperText="Définissez un objectif mesurable (optionnel)"
             />

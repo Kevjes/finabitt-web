@@ -199,13 +199,13 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
                 onClick={() => {
                   setFormData({
                     ...formData,
-                    type: type.value,
+                    type: type.value as Transaction['type'],
                     sourceAccountId: '',
                     destinationAccountId: ''
                   });
                   // Ajuster le type de catégorie par défaut
                   if (type.value !== 'transfer') {
-                    setNewCategoryData({ ...newCategoryData, type: type.value });
+                    setNewCategoryData({ ...newCategoryData, type: type.value as TransactionCategory['type'] });
                   }
                 }}
               >

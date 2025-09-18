@@ -121,7 +121,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
                     ? 'ring-2 ring-primary bg-primary/5'
                     : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-                onClick={() => setFormData({ ...formData, type: type.value })}
+                onClick={() => setFormData({ ...formData, type: type.value as 'checking' | 'savings' | 'cash' | 'investment' | 'credit' })}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{type.icon}</span>

@@ -67,7 +67,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
           label="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(value) => setEmail(value)}
           required
           autoComplete="email"
         />
@@ -76,7 +76,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
           label="Mot de passe"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(value) => setPassword(value)}
           required
           autoComplete="new-password"
           helperText="Au moins 6 caractères"
@@ -86,7 +86,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
           label="Confirmer le mot de passe"
           type="password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(value) => setConfirmPassword(value)}
           required
           autoComplete="new-password"
         />

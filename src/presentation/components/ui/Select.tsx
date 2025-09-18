@@ -5,6 +5,7 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
   error?: string;
   helperText?: string;
   options: { value: string; label: string }[];
+  placeholder?: string;
   onChange?: (value: string) => void;
 }
 
@@ -14,6 +15,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     error,
     helperText,
     options,
+    placeholder,
     className = '',
     id,
     onChange,
@@ -48,6 +50,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           onChange={handleChange}
           {...props}
         >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

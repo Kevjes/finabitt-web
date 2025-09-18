@@ -1,0 +1,436 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAccountRules } from '@/src/presentation/hooks/useAccountRules';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { AccountRule } from '@/src/shared/types';
+import Button from '@/src/presentation/components/ui/Button';
+import Card from '@/src/presentation/components/ui/Card';
+import Input from '@/src/presentation/components/ui/Input';
+import Select from '@/src/presentation/components/ui/Select';
+import Textarea from '@/src/presentation/components/ui/Textarea';
+
+interface AccountRulesManagementProps {
+  accountId?: string; // Si fourni, affiche les règles pour ce compte spécifiquement
+}
+
+const AccountRulesManagement: React.FC<AccountRulesManagementProps> = ({ accountId }) => {
+  const {
+    rules,
+    loading,
+    error,
+    createAccountRule,
+    updateAccountRule,
+    deleteAccountRule,
+    toggleRuleStatus,
+    getRulesByAccount
+  } = useAccountRules();
+
+  const { accounts } = useFinance();
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingRule, setEditingRule] = useState<AccountRule | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    sourceAccountId: '',
+    destinationAccountId: '',
+    type: 'percentage' as 'percentage' | 'fixed_amount',
+    value: 0,
+    triggerType: 'on_income' as 'on_income' | 'on_expense' | 'scheduled',
+    frequency: 'monthly' as 'daily' | 'weekly' | 'monthly',
+    minAmount: '',
+    maxAmount: ''
+  });
+
+  const displayRules = accountId ? getRulesByAccount(accountId) : rules;
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      sourceAccountId: '',
+      destinationAccountId: '',
+      type: 'percentage',
+      value: 0,
+      triggerType: 'on_income',
+      frequency: 'monthly',
+      minAmount: '',
+      maxAmount: ''
+    });
+    setEditingRule(null);
+    setShowCreateForm(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.sourceAccountId || !formData.destinationAccountId) {
+      return;
+    }
+
+    if (formData.sourceAccountId === formData.destinationAccountId) {
+      alert('Les comptes source et destination doivent être différents');
+      return;
+    }
+
+    try {
+      const ruleData = {
+        name: formData.name,
+        description: formData.description || undefined,
+        sourceAccountId: formData.sourceAccountId,
+        destinationAccountId: formData.destinationAccountId,
+        type: formData.type,
+        value: formData.value,
+        triggerType: formData.triggerType,
+        frequency: formData.triggerType === 'scheduled' ? formData.frequency : undefined,
+        minAmount: formData.minAmount ? parseFloat(formData.minAmount) : undefined,
+        maxAmount: formData.maxAmount ? parseFloat(formData.maxAmount) : undefined,
+        isActive: true,
+        nextExecutionDate: formData.triggerType === 'scheduled' ? new Date() : undefined
+      };
+
+      if (editingRule) {
+        await updateAccountRule(editingRule.id, ruleData);
+      } else {
+        await createAccountRule(ruleData);
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error('Error saving rule:', error);
+    }
+  };
+
+  const handleEdit = (rule: AccountRule) => {
+    setFormData({
+      name: rule.name,
+      description: rule.description || '',
+      sourceAccountId: rule.sourceAccountId,
+      destinationAccountId: rule.destinationAccountId,
+      type: rule.type,
+      value: rule.value,
+      triggerType: rule.triggerType,
+      frequency: rule.frequency || 'monthly',
+      minAmount: rule.minAmount?.toString() || '',
+      maxAmount: rule.maxAmount?.toString() || ''
+    });
+    setEditingRule(rule);
+    setShowCreateForm(true);
+  };
+
+  const handleDelete = async (ruleId: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette règle ?')) {
+      await deleteAccountRule(ruleId);
+    }
+  };
+
+  const getTriggerTypeLabel = (type: string) => {
+    switch (type) {
+      case 'on_income': return 'À chaque entrée d\'argent';
+      case 'on_expense': return 'À chaque sortie d\'argent';
+      case 'scheduled': return 'Programmé';
+      default: return type;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    return type === 'percentage' ? 'Pourcentage' : 'Montant fixe';
+  };
+
+  const getFrequencyLabel = (frequency?: string) => {
+    switch (frequency) {
+      case 'daily': return 'Quotidien';
+      case 'weekly': return 'Hebdomadaire';
+      case 'monthly': return 'Mensuel';
+      default: return '';
+    }
+  };
+
+  const getAccountName = (accountId: string) => {
+    const account = accounts.find(a => a.id === accountId);
+    return account ? account.name : 'Compte inconnu';
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500 dark:text-gray-400">Chargement des règles...</div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6\">
+      {/* Header */}
+      <div className="flex justify-between items-center\">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100\">
+            {accountId ? 'Règles de liaison' : 'Gestion des règles de comptes'}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1\">
+            Configurez des transferts automatiques entre vos comptes
+          </p>
+        </div>
+        <Button
+          onClick={() => setShowCreateForm(true)}
+          className="bg-primary hover:bg-primary/90\"
+        >
+          + Nouvelle règle
+        </Button>
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg\">
+          <p className="text-red-700 dark:text-red-300\">{error}</p>
+        </div>
+      )}
+
+      {/* Formulaire de création/édition */}
+      {showCreateForm && (
+        <Card>
+          <h3 className="text-lg font-semibold mb-4\">
+            {editingRule ? 'Modifier la règle' : 'Créer une nouvelle règle'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4\">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4\">
+              <Input
+                label=\"Nom de la règle\"
+                value={formData.name}
+                onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
+                placeholder=\"Ex: Épargne automatique\"
+                required
+              />
+              <Select
+                label=\"Type de transfert\"
+                value={formData.type}
+                onChange={(value) => setFormData(prev => ({ ...prev, type: value as 'percentage' | 'fixed_amount' }))}
+                options={[
+                  { value: 'percentage', label: 'Pourcentage' },
+                  { value: 'fixed_amount', label: 'Montant fixe' }
+                ]}
+              />
+            </div>
+
+            <Textarea
+              label=\"Description (optionnel)\"
+              value={formData.description}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+              placeholder=\"Décrivez l'objectif de cette règle...\"
+              rows={2}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4\">
+              <Select
+                label=\"Compte source\"
+                value={formData.sourceAccountId}
+                onChange={(value) => setFormData(prev => ({ ...prev, sourceAccountId: value }))}
+                options={[
+                  { value: '', label: 'Sélectionner un compte' },
+                  ...accounts.filter(a => a.isActive).map(account => ({
+                    value: account.id,
+                    label: `${account.name} (${account.currentBalance.toFixed(2)}€)`
+                  }))
+                ]}
+                required
+              />
+              <Select
+                label=\"Compte destination\"
+                value={formData.destinationAccountId}
+                onChange={(value) => setFormData(prev => ({ ...prev, destinationAccountId: value }))}
+                options={[
+                  { value: '', label: 'Sélectionner un compte' },
+                  ...accounts.filter(a => a.isActive && a.id !== formData.sourceAccountId).map(account => ({
+                    value: account.id,
+                    label: `${account.name} (${account.currentBalance.toFixed(2)}€)`
+                  }))
+                ]}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4\">
+              <Input
+                label={formData.type === 'percentage' ? 'Pourcentage (%)' : 'Montant (€)'}
+                type=\"number\"
+                value={formData.value.toString()}
+                onChange={(value) => setFormData(prev => ({ ...prev, value: parseFloat(value) || 0 }))}
+                placeholder={formData.type === 'percentage' ? '10' : '100'}
+                min=\"0\"
+                max={formData.type === 'percentage' ? '100' : undefined}
+                step={formData.type === 'percentage' ? '0.1' : '0.01'}
+                required
+              />
+              <Select
+                label=\"Déclencheur\"
+                value={formData.triggerType}
+                onChange={(value) => setFormData(prev => ({ ...prev, triggerType: value as 'on_income' | 'on_expense' | 'scheduled' }))}
+                options={[
+                  { value: 'on_income', label: 'Entrée d\\'argent' },
+                  { value: 'on_expense', label: 'Sortie d\\'argent' },
+                  { value: 'scheduled', label: 'Programmé' }
+                ]}
+              />
+              {formData.triggerType === 'scheduled' && (
+                <Select
+                  label=\"Fréquence\"
+                  value={formData.frequency}
+                  onChange={(value) => setFormData(prev => ({ ...prev, frequency: value as 'daily' | 'weekly' | 'monthly' }))}
+                  options={[
+                    { value: 'daily', label: 'Quotidien' },
+                    { value: 'weekly', label: 'Hebdomadaire' },
+                    { value: 'monthly', label: 'Mensuel' }
+                  ]}
+                />
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4\">
+              <Input
+                label=\"Montant minimum (€) - optionnel\"
+                type=\"number\"
+                value={formData.minAmount}
+                onChange={(value) => setFormData(prev => ({ ...prev, minAmount: value }))}
+                placeholder=\"0.00\"
+                min=\"0\"
+                step=\"0.01\"
+              />
+              <Input
+                label=\"Montant maximum (€) - optionnel\"
+                type=\"number\"
+                value={formData.maxAmount}
+                onChange={(value) => setFormData(prev => ({ ...prev, maxAmount: value }))}
+                placeholder=\"1000.00\"
+                min=\"0\"
+                step=\"0.01\"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3\">
+              <Button
+                type=\"button\"
+                variant=\"outline\"
+                onClick={resetForm}
+              >
+                Annuler
+              </Button>
+              <Button
+                type=\"submit\"
+                className="bg-primary hover:bg-primary/90\"
+              >
+                {editingRule ? 'Modifier' : 'Créer'} la règle
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {/* Liste des règles */}
+      <div className="space-y-4\">
+        {displayRules.length === 0 ? (
+          <Card>
+            <div className="text-center py-8\">
+              <div className="text-gray-500 dark:text-gray-400 mb-4\">
+                Aucune règle de liaison configurée
+              </div>
+              <Button
+                onClick={() => setShowCreateForm(true)}
+                variant=\"outline\"
+              >
+                Créer votre première règle
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          displayRules.map((rule) => (
+            <Card key={rule.id} className="hover:shadow-lg transition-shadow\">
+              <div className="flex justify-between items-start\">
+                <div className="flex-1\">
+                  <div className="flex items-center space-x-3 mb-2\">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100\">
+                      {rule.name}
+                    </h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      rule.isActive
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+                    }`}>
+                      {rule.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+
+                  {rule.description && (
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-3\">
+                      {rule.description}
+                    </p>
+                  )}
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm\">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400\">De:</span>
+                      <div className="font-medium\">{getAccountName(rule.sourceAccountId)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400\">Vers:</span>
+                      <div className="font-medium\">{getAccountName(rule.destinationAccountId)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400\">Montant:</span>
+                      <div className="font-medium\">
+                        {rule.type === 'percentage' ? `${rule.value}%` : `${rule.value.toFixed(2)}€`}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400\">Déclencheur:</span>
+                      <div className="font-medium\">{getTriggerTypeLabel(rule.triggerType)}</div>
+                    </div>
+                  </div>
+
+                  {(rule.minAmount || rule.maxAmount || rule.frequency) && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700\">
+                      <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400\">
+                        {rule.minAmount && <span>Min: {rule.minAmount.toFixed(2)}€</span>}
+                        {rule.maxAmount && <span>Max: {rule.maxAmount.toFixed(2)}€</span>}
+                        {rule.frequency && <span>Fréquence: {getFrequencyLabel(rule.frequency)}</span>}
+                        {rule.executionCount > 0 && <span>Exécutée {rule.executionCount} fois</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2 ml-4\">
+                  <Button
+                    variant=\"outline\"
+                    size=\"sm\"
+                    onClick={() => toggleRuleStatus(rule.id)}
+                  >
+                    {rule.isActive ? 'Désactiver' : 'Activer'}
+                  </Button>
+                  <Button
+                    variant=\"outline\"
+                    size=\"sm\"
+                    onClick={() => handleEdit(rule)}
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    variant=\"outline\"
+                    size=\"sm\"
+                    onClick={() => handleDelete(rule.id)}
+                    className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400\"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AccountRulesManagement;

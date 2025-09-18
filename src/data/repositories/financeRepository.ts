@@ -100,7 +100,8 @@ export class FinanceRepository {
 
     // Mettre à jour les soldes des comptes si la transaction est completed
     if (transaction.status === 'completed') {
-      await this.updateAccountBalances(batch, transaction);
+      const fullTransaction: Transaction = { ...transaction, id: transactionRef.id };
+      await this.updateAccountBalances(batch, fullTransaction);
     }
 
     await batch.commit();
