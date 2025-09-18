@@ -1,0 +1,156 @@
+'use client';
+
+import { useAuth } from '@/src/presentation/hooks/useAuth';
+import Button from '@/src/presentation/components/ui/Button';
+import Card from '@/src/presentation/components/ui/Card';
+import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
+
+const Dashboard: React.FC = () => {
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-primary">Finabitt</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Bonjour, {user?.email}</span>
+              <ThemeToggle />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                Déconnexion
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tableau de bord</h2>
+          <p className="text-gray-600 dark:text-gray-400">Vue d'ensemble de vos habitudes, performances et finances</p>
+        </div>
+
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Habitudes Card */}
+          <Card shadow="lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Habitudes</h3>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Aujourd'hui</span>
+                <span className="font-medium">0/0</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-primary h-2 rounded-full" style={{ width: '0%' }}></div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Aucune habitude configurée</p>
+            </div>
+          </Card>
+
+          {/* Performances Card */}
+          <Card shadow="lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Performances</h3>
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Tâches terminées</span>
+                <span className="font-medium">0</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">En cours</span>
+                <span className="font-medium">0</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Aucune tâche créée</p>
+            </div>
+          </Card>
+
+          {/* Finances Card */}
+          <Card shadow="lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Finances</h3>
+              <div className="w-8 h-8 bg-success rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Solde total</span>
+                <span className="font-medium">0 €</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Ce mois</span>
+                <span className="font-medium text-success">+0 €</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Aucun compte configuré</p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card shadow="lg">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Actions rapides</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+              <div className="w-5 h-5 mb-1 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+</span>
+              </div>
+              <span className="text-xs">Nouvelle habitude</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+              <div className="w-5 h-5 mb-1 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">□</span>
+              </div>
+              <span className="text-xs">Nouvelle tâche</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+              <div className="w-5 h-5 mb-1 bg-success rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">€</span>
+              </div>
+              <span className="text-xs">Nouveau compte</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+              <div className="w-5 h-5 mb-1 bg-info rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">↕</span>
+              </div>
+              <span className="text-xs">Transaction</span>
+            </Button>
+          </div>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
