@@ -3,6 +3,7 @@
 import { useAuth } from '@/src/presentation/hooks/useAuth';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
 import { useTasks } from '@/src/presentation/hooks/useTasks';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
@@ -11,6 +12,7 @@ const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const { habits, loading: habitsLoading } = useHabits();
   const { tasks, loading: tasksLoading } = useTasks();
+  const { accounts, getTotalBalance, getMonthlyIncome, loading: financeLoading } = useFinance();
 
   const handleLogout = async () => {
     try {
@@ -112,7 +114,7 @@ const Dashboard: React.FC = () => {
           </Card>
 
           {/* Finances Card */}
-          <Card shadow="lg">
+          <Card shadow="lg" className="cursor-pointer hover:shadow-xl transition-shadow" onClick={() => window.location.href = '/finances/accounts'}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Finances</h3>
               <div className="w-8 h-8 bg-success rounded-lg flex items-center justify-center">
@@ -124,13 +126,19 @@ const Dashboard: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Solde total</span>
-                <span className="font-medium">0 €</span>
+                <span className="font-medium">{financeLoading ? '...' : `${getTotalBalance().toFixed(2)} €`}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Ce mois</span>
-                <span className="font-medium text-success">+0 €</span>
+                <span className="font-medium text-success">{financeLoading ? '...' : `+${getMonthlyIncome().toFixed(2)} €`}</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Aucun compte configuré</p>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Comptes</span>
+                <span className="font-medium">{financeLoading ? '...' : accounts.length}</span>
+              </div>
+              {accounts.length === 0 && !financeLoading && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-2">Cliquez pour créer votre premier compte</p>
+              )}
             </div>
           </Card>
         </div>
@@ -151,13 +159,13 @@ const Dashboard: React.FC = () => {
               </div>
               <span className="text-xs">Nouvelle tâche</span>
             </Button>
-            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/finances/accounts'}>
               <div className="w-5 h-5 mb-1 bg-success rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">€</span>
               </div>
               <span className="text-xs">Nouveau compte</span>
             </Button>
-            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/finances/transactions'}>
               <div className="w-5 h-5 mb-1 bg-info rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">↕</span>
               </div>

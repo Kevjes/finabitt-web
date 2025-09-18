@@ -6,7 +6,7 @@ import { useTasks } from '@/src/presentation/hooks/useTasks';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
-import TextArea from '@/src/presentation/components/ui/Textarea';
+import Textarea from '@/src/presentation/components/ui/Textarea';
 import Select from '@/src/presentation/components/ui/Select';
 import Button from '@/src/presentation/components/ui/Button';
 import TagInput from '@/src/presentation/components/ui/TagInput';
@@ -177,7 +177,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           placeholder="Titre de la tâche"
         />
 
-        <TextArea
+        <Textarea
           label="Description"
           value={formData.description}
           onChange={(value) => setFormData({ ...formData, description: value })}
