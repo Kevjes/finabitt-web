@@ -1,0 +1,26 @@
+'use client';
+
+import { useAuth } from '@/src/presentation/hooks/useAuth';
+import HabitsPage from '@/src/presentation/components/habits/HabitsPage';
+
+export default function Habits() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Redirect will be handled by the AuthProvider
+    return null;
+  }
+
+  return <HabitsPage />;
+}

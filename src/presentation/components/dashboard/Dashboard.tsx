@@ -1,12 +1,16 @@
 'use client';
 
 import { useAuth } from '@/src/presentation/hooks/useAuth';
+import { useHabits } from '@/src/presentation/hooks/useHabits';
+import { useTasks } from '@/src/presentation/hooks/useTasks';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { habits, loading: habitsLoading } = useHabits();
+  const { tasks, loading: tasksLoading } = useTasks();
 
   const handleLogout = async () => {
     try {
@@ -50,7 +54,7 @@ const Dashboard: React.FC = () => {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Habitudes Card */}
-          <Card shadow="lg">
+          <Card shadow="lg" className="cursor-pointer hover:shadow-xl transition-shadow" onClick={() => window.location.href = '/habits'}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Habitudes</h3>
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -61,18 +65,25 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Aujourd'hui</span>
-                <span className="font-medium">0/0</span>
+                <span className="text-gray-600 dark:text-gray-400">Total</span>
+                <span className="font-medium">{habitsLoading ? '...' : habits.length}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-primary h-2 rounded-full" style={{ width: '0%' }}></div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Bonnes</span>
+                <span className="font-medium text-primary">{habitsLoading ? '...' : habits.filter(h => h.type === 'good').length}</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Aucune habitude configurée</p>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Mauvaises</span>
+                <span className="font-medium text-accent">{habitsLoading ? '...' : habits.filter(h => h.type === 'bad').length}</span>
+              </div>
+              {habits.length === 0 && !habitsLoading && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-2">Cliquez pour créer votre première habitude</p>
+              )}
             </div>
           </Card>
 
           {/* Performances Card */}
-          <Card shadow="lg">
+          <Card shadow="lg" className="cursor-pointer hover:shadow-xl transition-shadow" onClick={() => window.location.href = '/tasks'}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Performances</h3>
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
@@ -83,14 +94,20 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Tâches terminées</span>
-                <span className="font-medium">0</span>
+                <span className="text-gray-600 dark:text-gray-400">Total</span>
+                <span className="font-medium">{tasksLoading ? '...' : tasks.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Terminées</span>
+                <span className="font-medium text-success">{tasksLoading ? '...' : tasks.filter(t => t.status === 'completed').length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">En cours</span>
-                <span className="font-medium">0</span>
+                <span className="font-medium text-accent">{tasksLoading ? '...' : tasks.filter(t => t.status === 'in_progress').length}</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Aucune tâche créée</p>
+              {tasks.length === 0 && !tasksLoading && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-2">Cliquez pour créer votre première tâche</p>
+              )}
             </div>
           </Card>
 
@@ -122,13 +139,13 @@ const Dashboard: React.FC = () => {
         <Card shadow="lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Actions rapides</h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/habits'}>
               <div className="w-5 h-5 mb-1 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">+</span>
               </div>
               <span className="text-xs">Nouvelle habitude</span>
             </Button>
-            <Button variant="outline" size="sm" className="h-auto py-3 flex-col">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/tasks'}>
               <div className="w-5 h-5 mb-1 bg-accent rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">□</span>
               </div>

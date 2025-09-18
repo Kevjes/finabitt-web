@@ -7,6 +7,11 @@ export interface User {
 }
 
 // Habit types
+export interface HabitSchedule {
+  day: string; // 'monday', 'tuesday', etc. or 'daily' for every day
+  times: string[]; // Array of time strings like ['09:30', '22:00']
+}
+
 export interface Habit {
   id: string;
   userId: string;
@@ -17,6 +22,11 @@ export interface Habit {
   customDays?: string[];
   target?: string;
   isActive: boolean;
+  // Nouveau système d'horaires
+  hasTimeSchedule: boolean; // Si true, utilise les horaires spécifiques
+  schedules?: HabitSchedule[]; // Horaires détaillés par jour
+  // Ou horaires simples pour toute la semaine
+  dailyTimes?: string[]; // Pour frequency='daily' avec horaires fixes
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,14 +45,58 @@ export interface Task {
   userId: string;
   title: string;
   description?: string;
-  category: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'rescheduled';
+  status: 'todo' | 'in_progress' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  category?: string;
+  tags?: string[];
   dueDate?: Date;
-  linkedHabitId?: string;
-  linkedTransactionId?: string;
+  dueTime?: string; // format HH:MM pour l'heure d'échéance
+  estimatedDuration?: number; // in minutes
+  actualDuration?: number; // in minutes
+  completedAt?: Date;
+  isRecurring: boolean;
+  recurringPattern?: RecurringPattern;
+  parentTaskId?: string; // for subtasks
+  habitId?: string; // link to associated habit
+  transactionId?: string; // link to associated transaction
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface RecurringPattern {
+  type: 'daily' | 'weekly' | 'monthly';
+  interval: number; // every X days/weeks/months
+  daysOfWeek?: number[]; // 0-6, Sunday to Saturday
+  dayOfMonth?: number; // 1-31
+  endDate?: Date;
+}
+
+export interface TaskCategory {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+  icon?: string;
+  createdAt: Date;
+}
+
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  content: string;
+  createdAt: Date;
+}
+
+export interface TaskTimeEntry {
+  id: string;
+  taskId: string;
+  userId: string;
+  startTime: Date;
+  endTime?: Date;
+  duration: number; // in minutes
+  description?: string;
+  createdAt: Date;
 }
 
 // Finance types
