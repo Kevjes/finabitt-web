@@ -5,6 +5,7 @@ import { useTasks } from '@/src/presentation/hooks/useTasks';
 import { Task } from '@/src/shared/types';
 import TaskCard from './TaskCard';
 import CreateTaskModal from './CreateTaskModal';
+import CategoryManagement from './CategoryManagement';
 import Button from '@/src/presentation/components/ui/Button';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
@@ -19,6 +20,7 @@ interface TaskColumn {
 const TaskDashboard: React.FC = () => {
   const { tasks, categories, loading, error, refetch } = useTasks();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCategoryManagementOpen, setIsCategoryManagementOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedPriority, setSelectedPriority] = useState('');
@@ -96,13 +98,22 @@ const TaskDashboard: React.FC = () => {
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          className="whitespace-nowrap"
-        >
-          ➕ Nouvelle tâche
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsCategoryManagementOpen(true)}
+            className="whitespace-nowrap"
+          >
+            📁 Catégories
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="whitespace-nowrap"
+          >
+            ➕ Nouvelle tâche
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -276,6 +287,12 @@ const TaskDashboard: React.FC = () => {
           refetch();
           setIsCreateModalOpen(false);
         }}
+      />
+
+      {/* Category Management Modal */}
+      <CategoryManagement
+        isOpen={isCategoryManagementOpen}
+        onClose={() => setIsCategoryManagementOpen(false)}
       />
     </div>
   );

@@ -147,6 +147,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, showCategory = true }) => {
             {task.dueDate && (
               <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 font-medium' : ''}`}>
                 📅 {new Date(task.dueDate).toLocaleDateString('fr-FR')}
+                {task.dueTime && ` à ${task.dueTime}`}
                 {isOverdue && ' (En retard)'}
               </span>
             )}

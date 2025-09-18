@@ -9,6 +9,7 @@ import Input from '@/src/presentation/components/ui/Input';
 import TextArea from '@/src/presentation/components/ui/Textarea';
 import Select from '@/src/presentation/components/ui/Select';
 import Button from '@/src/presentation/components/ui/Button';
+import TagInput from '@/src/presentation/components/ui/TagInput';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     description: '',
     priority: 'medium' as Task['priority'],
     category: '',
-    tags: '',
+    tags: [] as string[],
     dueDate: '',
     dueTime: '',
     estimatedDuration: '',
@@ -54,7 +55,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         description: '',
         priority: 'medium',
         category: '',
-        tags: '',
+        tags: [],
         dueDate: '',
         dueTime: '',
         estimatedDuration: '',
@@ -95,7 +96,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         status: 'todo',
         priority: formData.priority,
         category: formData.category || undefined,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : undefined,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
         dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
         dueTime: formData.dueTime || undefined,
         estimatedDuration: formData.estimatedDuration ? Number(formData.estimatedDuration) : undefined,
@@ -246,15 +247,15 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           </div>
         </div>
 
-        <Input
+        <TagInput
           label="Tags"
           value={formData.tags}
-          onChange={(value) => setFormData({ ...formData, tags: value })}
-          placeholder="Tag1, Tag2, Tag3"
-          helperText="Séparez les tags par des virgules"
+          onChange={(tags) => setFormData({ ...formData, tags })}
+          placeholder="Appuyez sur Entrée ou utilisez des virgules"
+          helperText="Organisez vos tâches avec des mots-clés"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="Date d'échéance"
             type="date"
@@ -263,12 +264,21 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           />
 
           <Input
+            label="Heure d'échéance"
+            type="time"
+            value={formData.dueTime}
+            onChange={(value) => setFormData({ ...formData, dueTime: value })}
+            helperText="Ex: 12:30 pour envoyer un mail"
+          />
+
+          <Input
             label="Durée estimée (minutes)"
             type="number"
             value={formData.estimatedDuration}
             onChange={(value) => setFormData({ ...formData, estimatedDuration: value })}
             error={errors.estimatedDuration}
-            placeholder="120"
+            placeholder="5"
+            helperText="Ex: 5 minutes"
           />
         </div>
 

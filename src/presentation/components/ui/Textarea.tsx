@@ -1,9 +1,10 @@
 import { TextareaHTMLAttributes, forwardRef } from 'react';
 
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
   label?: string;
   error?: string;
   helperText?: string;
+  onChange?: (value: string) => void;
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -13,9 +14,16 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     helperText,
     className = '',
     id,
+    onChange,
     ...props
   }, ref) => {
     const textareaId = id || label?.toLowerCase().replace(/\s+/g, '-');
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (onChange) {
+        onChange(e.target.value);
+      }
+    };
 
     return (
       <div className="w-full">
@@ -35,6 +43,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               ? 'border-error focus:ring-error focus:border-error'
               : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
           } ${className}`}
+          onChange={handleChange}
           {...props}
         />
         {error && (

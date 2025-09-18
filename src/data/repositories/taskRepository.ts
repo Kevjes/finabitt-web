@@ -161,13 +161,26 @@ export class TaskRepository {
 
   // Category management
   async createCategory(category: Omit<TaskCategory, 'id'>): Promise<string> {
-    const categoryData = {
+    const categoryData = this.cleanCategoryData({
       ...category,
       createdAt: Timestamp.fromDate(category.createdAt)
-    };
+    });
 
     const docRef = await addDoc(collection(db, this.categoriesCollection), categoryData);
     return docRef.id;
+  }
+
+  private cleanCategoryData(category: any): any {
+    const cleaned: any = {};
+
+    Object.keys(category).forEach(key => {
+      const value = category[key];
+      if (value !== undefined && value !== null && value !== '') {
+        cleaned[key] = value;
+      }
+    });
+
+    return cleaned;
   }
 
   async getCategoriesByUserId(userId: string): Promise<TaskCategory[]> {
