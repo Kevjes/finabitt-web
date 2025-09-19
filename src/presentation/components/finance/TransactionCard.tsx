@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Transaction } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { formatAmount, Currency } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
 import EditTransactionModal from './EditTransactionModal';
@@ -38,10 +39,11 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
+    // For transaction cards, we need to get the currency from the account
+    const sourceAccount = accounts.find(a => a.id === transaction.sourceAccountId);
+    const destinationAccount = accounts.find(a => a.id === transaction.destinationAccountId);
+    const currency = (sourceAccount?.currency || destinationAccount?.currency || 'FCFA') as Currency;
+    return formatAmount(amount, currency);
   };
 
   const formatDate = (date: Date) => {

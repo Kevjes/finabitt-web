@@ -57,6 +57,13 @@ export interface HabitProgress {
   notes?: string;
 }
 
+// Status tracking pour performance analytics
+export interface StatusHistoryEntry {
+  status: 'todo' | 'in_progress' | 'completed' | 'cancelled';
+  timestamp: Date;
+  durationInPreviousStatus?: number; // temps passé dans le statut précédent (en minutes)
+}
+
 // Performance types
 export interface Task {
   id: string;
@@ -72,6 +79,11 @@ export interface Task {
   estimatedDuration?: number; // in minutes
   actualDuration?: number; // in minutes
   completedAt?: Date;
+  // Status tracking pour analytics de performance
+  statusHistory?: StatusHistoryEntry[];
+  timeInTodo?: number; // temps en minutes dans le statut "todo"
+  timeInProgress?: number; // temps en minutes dans le statut "in_progress"
+  timeToComplete?: number; // temps total en minutes de création à completion
   isRecurring: boolean;
   recurringPattern?: RecurringPattern;
   parentTaskId?: string; // for subtasks
@@ -204,6 +216,7 @@ export interface Budget {
   id: string;
   userId: string;
   name: string;
+  description?: string;
   category: string;
   amount: number;
   spent: number;

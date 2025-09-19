@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Account } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY, Currency } from '@/src/shared/utils/currency';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
@@ -24,7 +25,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     name: '',
     type: 'checking' as Account['type'],
     initialBalance: 0,
-    currency: 'EUR',
+    currency: DEFAULT_CURRENCY,
     bankName: '',
     accountNumber: '',
     color: '#3B82F6',
@@ -39,13 +40,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     { value: 'credit', label: 'Carte de crédit', icon: '💳' }
   ];
 
-  const currencies = [
-    { value: 'EUR', label: 'Euro (€)' },
-    { value: 'USD', label: 'Dollar américain ($)' },
-    { value: 'GBP', label: 'Livre sterling (£)' },
-    { value: 'CHF', label: 'Franc suisse (CHF)' },
-    { value: 'CAD', label: 'Dollar canadien (CAD)' }
-  ];
+  const currencies = SUPPORTED_CURRENCIES;
 
   const predefinedColors = [
     '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -82,7 +77,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
           name: '',
           type: 'checking',
           initialBalance: 0,
-          currency: 'EUR',
+          currency: DEFAULT_CURRENCY,
           bankName: '',
           accountNumber: '',
           color: '#3B82F6',
@@ -171,8 +166,8 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
           <Select
             label="Devise"
             value={formData.currency}
-            onChange={(value) => setFormData({ ...formData, currency: value })}
-            options={currencies}
+            onChange={(value) => setFormData({ ...formData, currency: value as Currency })}
+            options={currencies.map(c => ({ value: c.value, label: c.label }))}
           />
         </div>
 

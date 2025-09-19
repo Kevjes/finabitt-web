@@ -248,6 +248,22 @@ export class FinanceRepository {
     } as Budget));
   }
 
+  async updateBudget(budgetId: string, updates: Partial<Budget>): Promise<void> {
+    const budgetRef = doc(db, this.budgetsCollection, budgetId);
+    const cleanedUpdates = this.cleanFinanceData({
+      ...updates,
+      ...(updates.startDate && { startDate: Timestamp.fromDate(updates.startDate) }),
+      ...(updates.endDate && { endDate: Timestamp.fromDate(updates.endDate) }),
+      updatedAt: Timestamp.now()
+    });
+    await updateDoc(budgetRef, cleanedUpdates);
+  }
+
+  async deleteBudget(budgetId: string): Promise<void> {
+    const budgetRef = doc(db, this.budgetsCollection, budgetId);
+    await updateDoc(budgetRef, { isActive: false });
+  }
+
   // ===== GOALS =====
   async createGoal(goal: Omit<Goal, 'id'>): Promise<string> {
     const cleanedGoal = this.cleanFinanceData({

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Account } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { useAccountRules } from '@/src/presentation/hooks/useAccountRules';
+import { formatAmount, Currency } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
 import EditAccountModal from './EditAccountModal';
@@ -13,7 +15,12 @@ interface AccountCardProps {
 
 const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
   const { getTransactionsByAccount } = useFinance();
+  const { getRulesByAccount } = useAccountRules();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Récupérer les règles liées à ce compte
+  const linkedRules = getRulesByAccount(account.id);
+  const activeRules = linkedRules.filter(rule => rule.isActive);
 
   const getAccountTypeInfo = (type: Account['type']) => {
     const types = {
@@ -27,10 +34,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: account.currency || 'EUR'
-    }).format(amount);
+    return formatAmount(amount, (account.currency || 'FCFA') as Currency);
   };
 
   const formatAccountNumber = (accountNumber?: string) => {
@@ -75,6 +79,26 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
                   <p className="text-xs text-gray-400">
                     {account.bankName}
                   </p>
+                )}
+
+                {/* Indicateurs de règles de liaison */}
+                {activeRules.length > 0 && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <span
+                      className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full flex items-center gap-1 cursor-help"
+                      title={`Règles actives:\n${activeRules.map(rule => `• ${rule.name} (${rule.type === 'percentage' ? rule.value + '%' : formatAmount(rule.value, 'FCFA')})`).join('\n')}`}
+                    >
+                      🔗 {activeRules.length} règle{activeRules.length > 1 ? 's' : ''}
+                    </span>
+                    {linkedRules.some(rule => !rule.isActive) && (
+                      <span
+                        className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full cursor-help"
+                        title={`${linkedRules.filter(rule => !rule.isActive).length} règle(s) inactive(s)`}
+                      >
+                        ⏸️ {linkedRules.filter(rule => !rule.isActive).length}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

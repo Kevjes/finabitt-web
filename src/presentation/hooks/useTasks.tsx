@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { TaskRepository } from '@/src/data/repositories/taskRepository';
-import { Task, TaskCategory, TaskTimeEntry } from '@/src/shared/types';
+import { Task, TaskCategory, TaskTimeEntry, StatusHistoryEntry } from '@/src/shared/types';
 
 const taskRepository = new TaskRepository();
 
@@ -50,9 +50,20 @@ export const useTasks = () => {
     if (!user) throw new Error('User not authenticated');
 
     const now = new Date();
+
+    // Initialiser le tracking des statuts
+    const initialStatusHistory: StatusHistoryEntry[] = [{
+      status: taskData.status || 'todo',
+      timestamp: now,
+      durationInPreviousStatus: 0
+    }];
+
     const newTask: Omit<Task, 'id'> = {
       ...taskData,
       userId: user.id,
+      statusHistory: initialStatusHistory,
+      timeInTodo: 0,
+      timeInProgress: 0,
       createdAt: now,
       updatedAt: now
     };
@@ -67,10 +78,6 @@ export const useTasks = () => {
       };
 
       setTasks(prevTasks => [createdTask, ...prevTasks]);
-
-      setTimeout(async () => {
-        await loadTasks();
-      }, 1000);
 
       return true;
     } catch (err) {
@@ -91,6 +98,12 @@ export const useTasks = () => {
             : task
         )
       );
+
+      // Pour les changements de statut, on veut être sûr que l'UI se met à jour immédiatement
+      if (updates.status || updates.completedAt) {
+        // Force un re-render immédiat
+        await loadTasks();
+      }
 
       return true;
     } catch (err) {
@@ -117,9 +130,58 @@ export const useTasks = () => {
   };
 
   const updateTaskStatus = async (taskId: string, status: Task['status']) => {
+    // Trouver la tâche actuelle pour calculer les durées
+    const currentTask = tasks.find(task => task.id === taskId);
+    if (!currentTask) {
+      throw new Error('Task not found');
+    }
+
+    const now = new Date();
+    const currentStatus = currentTask.status;
+
+    // Calculer la durée dans le statut actuel
+    const lastStatusChange = currentTask.statusHistory?.length
+      ? currentTask.statusHistory[currentTask.statusHistory.length - 1].timestamp
+      : currentTask.createdAt;
+
+    const durationInCurrentStatus = Math.floor((now.getTime() - lastStatusChange.getTime()) / (1000 * 60)); // en minutes
+
+    // Créer la nouvelle entrée d'historique
+    const newHistoryEntry: StatusHistoryEntry = {
+      status,
+      timestamp: now,
+      durationInPreviousStatus: durationInCurrentStatus
+    };
+
+    // Mettre à jour l'historique des statuts
+    const updatedStatusHistory = [...(currentTask.statusHistory || []), newHistoryEntry];
+
+    // Calculer les temps cumulés dans chaque statut
+    let timeInTodo = currentTask.timeInTodo || 0;
+    let timeInProgress = currentTask.timeInProgress || 0;
+
+    // Ajouter la durée du statut actuel aux compteurs appropriés
+    switch (currentStatus) {
+      case 'todo':
+        timeInTodo += durationInCurrentStatus;
+        break;
+      case 'in_progress':
+        timeInProgress += durationInCurrentStatus;
+        break;
+    }
+
+    // Calculer le temps total de création à completion si la tâche est terminée
+    const timeToComplete = status === 'completed'
+      ? Math.floor((now.getTime() - currentTask.createdAt.getTime()) / (1000 * 60))
+      : currentTask.timeToComplete;
+
     const updates: Partial<Task> = {
       status,
-      ...(status === 'completed' && { completedAt: new Date() })
+      statusHistory: updatedStatusHistory,
+      timeInTodo,
+      timeInProgress,
+      timeToComplete,
+      ...(status === 'completed' && { completedAt: now })
     };
 
     return await updateTask(taskId, updates);
@@ -135,6 +197,76 @@ export const useTasks = () => {
 
   const getSubtasks = (parentTaskId: string) => {
     return tasks.filter(task => task.parentTaskId === parentTaskId);
+  };
+
+  // Analytics de performance
+  const getPerformanceAnalytics = () => {
+    const completedTasks = tasks.filter(task => task.status === 'completed' && task.timeToComplete);
+
+    if (completedTasks.length === 0) {
+      return {
+        averageCompletionTime: 0,
+        averageTimeInTodo: 0,
+        averageTimeInProgress: 0,
+        totalTasksCompleted: 0,
+        fastestTask: null,
+        slowestTask: null,
+        productivityTrend: []
+      };
+    }
+
+    const avgCompletionTime = completedTasks.reduce((sum, task) => sum + (task.timeToComplete || 0), 0) / completedTasks.length;
+    const avgTimeInTodo = completedTasks.reduce((sum, task) => sum + (task.timeInTodo || 0), 0) / completedTasks.length;
+    const avgTimeInProgress = completedTasks.reduce((sum, task) => sum + (task.timeInProgress || 0), 0) / completedTasks.length;
+
+    const sortedByTime = [...completedTasks].sort((a, b) => (a.timeToComplete || 0) - (b.timeToComplete || 0));
+    const fastestTask = sortedByTime[0];
+    const slowestTask = sortedByTime[sortedByTime.length - 1];
+
+    return {
+      averageCompletionTime: Math.round(avgCompletionTime),
+      averageTimeInTodo: Math.round(avgTimeInTodo),
+      averageTimeInProgress: Math.round(avgTimeInProgress),
+      totalTasksCompleted: completedTasks.length,
+      fastestTask,
+      slowestTask,
+      productivityTrend: getProductivityTrend()
+    };
+  };
+
+  const getProductivityTrend = () => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return date.toDateString();
+    }).reverse();
+
+    return last7Days.map(dateStr => {
+      const tasksCompleted = tasks.filter(task =>
+        task.status === 'completed' &&
+        task.completedAt &&
+        task.completedAt.toDateString() === dateStr
+      );
+
+      const avgTime = tasksCompleted.length > 0
+        ? tasksCompleted.reduce((sum, task) => sum + (task.timeToComplete || 0), 0) / tasksCompleted.length
+        : 0;
+
+      return {
+        date: dateStr,
+        tasksCompleted: tasksCompleted.length,
+        averageCompletionTime: Math.round(avgTime)
+      };
+    });
+  };
+
+  const formatDuration = (minutes: number): string => {
+    if (minutes < 60) {
+      return `${minutes}min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}min` : ''}`;
   };
 
   const createCategory = async (categoryData: Omit<TaskCategory, 'id' | 'userId' | 'createdAt'>) => {
@@ -246,6 +378,9 @@ export const useTasks = () => {
     startTimeTracking,
     stopTimeTracking,
     getTimeEntries,
+    // Performance analytics
+    getPerformanceAnalytics,
+    formatDuration,
     refetch: loadTasks
   };
 };

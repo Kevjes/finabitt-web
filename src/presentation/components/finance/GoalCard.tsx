@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Goal } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { formatAmount, Currency } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
 
@@ -29,10 +30,9 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal }) => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
+    const account = accounts.find(a => a.id === goal.accountId);
+    const currency = (account?.currency || 'FCFA') as Currency;
+    return formatAmount(amount, currency);
   };
 
   const getGoalTypeInfo = (type: Goal['type']) => {

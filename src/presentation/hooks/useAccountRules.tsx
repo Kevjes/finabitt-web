@@ -31,7 +31,7 @@ export const useAccountRules = () => {
     loadAccountRules();
   }, [loadAccountRules]);
 
-  const createAccountRule = async (ruleData: Omit<AccountRule, 'id' | 'createdAt' | 'updatedAt' | 'lastExecutedAt' | 'executionCount'>) => {
+  const createAccountRule = async (ruleData: Omit<AccountRule, 'id' | 'userId' | 'isActive' | 'createdAt' | 'updatedAt' | 'lastExecutedAt' | 'executionCount'>) => {
     if (!user?.id) throw new Error('User not authenticated');
 
     try {
@@ -39,7 +39,9 @@ export const useAccountRules = () => {
 
       const newRuleData = {
         ...ruleData,
-        userId: user.id
+        userId: user.id,
+        isActive: true,
+        executionCount: 0
       };
 
       const ruleId = await accountRuleRepository.createAccountRule(newRuleData);

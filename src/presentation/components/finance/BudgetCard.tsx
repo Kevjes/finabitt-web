@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Budget } from '@/src/shared/types';
+import { formatAmount } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
 
@@ -31,10 +32,7 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
+    return formatAmount(amount, 'FCFA');
   };
 
   const formatPeriod = (period: Budget['period']) => {

@@ -12,7 +12,7 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, showCategory = true }) => {
-  const { updateTaskStatus, deleteTask, startTimeTracking, stopTimeTracking } = useTasks();
+  const { updateTaskStatus, deleteTask, startTimeTracking, stopTimeTracking, formatDuration: formatTaskDuration } = useTasks();
   const [isLoading, setIsLoading] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [currentTimeEntryId, setCurrentTimeEntryId] = useState<string | null>(null);
@@ -156,6 +156,26 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, showCategory = true }) => {
               <span className="flex items-center gap-1">
                 ⏱️ {formatDuration(task.estimatedDuration)}
                 {task.actualDuration && ` / ${formatDuration(task.actualDuration)}`}
+              </span>
+            )}
+
+            {/* Afficher les temps de statut pour les tâches complétées */}
+            {task.status === 'completed' && task.timeToComplete && (
+              <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                🏁 Livré en {formatTaskDuration(task.timeToComplete)}
+              </span>
+            )}
+
+            {/* Afficher le temps dans le statut actuel pour les tâches en cours */}
+            {task.status === 'in_progress' && task.timeInProgress && (
+              <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                🔄 En cours depuis {formatTaskDuration(task.timeInProgress)}
+              </span>
+            )}
+
+            {task.status === 'todo' && task.timeInTodo && (
+              <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                📋 En attente depuis {formatTaskDuration(task.timeInTodo)}
               </span>
             )}
           </div>

@@ -82,9 +82,7 @@ export const useFinance = () => {
 
       setAccounts(prevAccounts => [createdAccount, ...prevAccounts]);
 
-      setTimeout(async () => {
-        await loadFinanceData();
-      }, 1000);
+      // Pas besoin de recharger pour les comptes, l'état est déjà mis à jour
 
       return true;
     } catch (err) {
@@ -156,10 +154,11 @@ export const useFinance = () => {
         await triggerAccountRules(createdTransaction);
       }
 
-      // Recharger pour mettre à jour les soldes
+      // Recharger immédiatement puis après un délai pour être sûr
+      await loadFinanceData();
       setTimeout(async () => {
         await loadFinanceData();
-      }, 1000);
+      }, 500);
 
       return true;
     } catch (err) {
@@ -224,6 +223,7 @@ export const useFinance = () => {
 
       // Recharger pour mettre à jour les soldes si nécessaire
       if (updates.status || updates.amount) {
+        await loadFinanceData();
         setTimeout(async () => {
           await loadFinanceData();
         }, 500);
@@ -245,10 +245,8 @@ export const useFinance = () => {
         prevTransactions.filter(transaction => transaction.id !== transactionId)
       );
 
-      // Recharger pour mettre à jour les soldes
-      setTimeout(async () => {
-        await loadFinanceData();
-      }, 500);
+      // Recharger immédiatement pour mettre à jour les soldes
+      await loadFinanceData();
 
       return true;
     } catch (err) {
@@ -312,6 +310,43 @@ export const useFinance = () => {
     } catch (err) {
       setError('Erreur lors de la création du budget');
       console.error('Error creating budget:', err);
+      return false;
+    }
+  };
+
+  const updateBudget = async (budgetId: string, updates: Partial<Budget>) => {
+    try {
+      await financeRepository.updateBudget(budgetId, updates);
+
+      setBudgets(prevBudgets =>
+        prevBudgets.map(budget =>
+          budget.id === budgetId
+            ? { ...budget, ...updates, updatedAt: new Date() }
+            : budget
+        )
+      );
+
+      return true;
+    } catch (err) {
+      setError('Erreur lors de la mise à jour du budget');
+      console.error('Error updating budget:', err);
+      await loadFinanceData();
+      return false;
+    }
+  };
+
+  const deleteBudget = async (budgetId: string) => {
+    try {
+      await financeRepository.deleteBudget(budgetId);
+      setBudgets(prevBudgets =>
+        prevBudgets.filter(budget => budget.id !== budgetId)
+      );
+
+      return true;
+    } catch (err) {
+      setError('Erreur lors de la suppression du budget');
+      console.error('Error deleting budget:', err);
+      await loadFinanceData();
       return false;
     }
   };
@@ -454,6 +489,8 @@ export const useFinance = () => {
 
     // Budget methods
     createBudget,
+    updateBudget,
+    deleteBudget,
 
     // Goal methods
     createGoal,
