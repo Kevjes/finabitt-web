@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Task, TaskCategory } from '@/src/shared/types';
 import { useTasks } from '@/src/presentation/hooks/useTasks';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Textarea from '@/src/presentation/components/ui/Textarea';
@@ -24,6 +25,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 }) => {
   const { createTask, categories, createCategory, error: taskError } = useTasks();
   const { habits } = useHabits();
+  const { transactions } = useFinance();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -35,7 +37,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     dueTime: '',
     estimatedDuration: '',
     isRecurring: false,
-    habitId: ''
+    habitId: '',
+    transactionId: '',
+    hasFinancialImpact: false,
+    estimatedCost: ''
   });
 
   const [showCreateCategory, setShowCreateCategory] = useState(false);
@@ -60,7 +65,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         dueTime: '',
         estimatedDuration: '',
         isRecurring: false,
-        habitId: ''
+        habitId: '',
+        transactionId: '',
+        hasFinancialImpact: false,
+        estimatedCost: ''
       });
       setErrors({});
       setShowCreateCategory(false);
@@ -101,7 +109,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         dueTime: formData.dueTime || undefined,
         estimatedDuration: formData.estimatedDuration ? Number(formData.estimatedDuration) : undefined,
         isRecurring: formData.isRecurring,
-        habitId: formData.habitId || undefined
+        habitId: formData.habitId || undefined,
+        transactionId: formData.transactionId || undefined,
+        hasFinancialImpact: formData.hasFinancialImpact,
+        estimatedCost: formData.estimatedCost ? Number(formData.estimatedCost) : undefined
       };
 
       const success = await createTask(taskData);
@@ -158,6 +169,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const habitOptions = [
     { value: '', label: 'Aucune habitude liée' },
     ...habits.map(habit => ({ value: habit.id, label: habit.name }))
+  ];
+
+  const transactionOptions = [
+    { value: '', label: 'Aucune transaction liée' },
+    ...transactions
+      .filter(transaction => transaction.status === 'pending')
+      .map(transaction => ({ value: transaction.id, label: `${transaction.description} (${transaction.amount} FCFA)` }))
   ];
 
   return (
@@ -290,6 +308,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           helperText="Associer cette tâche à une habitude existante"
         />
 
+        <Select
+          label="Transaction liée"
+          value={formData.transactionId}
+          onChange={(value) => setFormData({ ...formData, transactionId: value })}
+          options={transactionOptions}
+          helperText="Lier cette tâche à une transaction en attente (sera confirmée automatiquement à la completion)"
+        />
+
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -302,6 +328,32 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             Tâche récurrente
           </label>
         </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="hasFinancialImpact"
+            checked={formData.hasFinancialImpact}
+            onChange={(e) => setFormData({ ...formData, hasFinancialImpact: e.target.checked })}
+            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+          />
+          <label htmlFor="hasFinancialImpact" className="text-sm text-gray-700 dark:text-gray-300">
+            Cette tâche a un impact financier
+          </label>
+        </div>
+
+        {formData.hasFinancialImpact && (
+          <Input
+            label="Coût estimé (FCFA)"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.estimatedCost}
+            onChange={(value) => setFormData({ ...formData, estimatedCost: value })}
+            placeholder="2500"
+            helperText="Montant associé à cette tâche"
+          />
+        )}
 
         {taskError && (
           <div className="p-3 bg-error/10 border border-error/20 rounded-lg">

@@ -27,7 +27,12 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
     // Nouveaux champs pour les horaires
     hasTimeSchedule: false,
     dailyTimes: [] as string[],
-    schedules: [] as HabitSchedule[]
+    schedules: [] as HabitSchedule[],
+    // Nouveaux champs pour l'impact financier
+    hasFinancialImpact: false,
+    estimatedCostPerOccurrence: '',
+    // Champ pour créer automatiquement des tâches
+    createAutomaticTasks: true
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,6 +127,13 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
         }
       }
 
+      if (formData.hasFinancialImpact) {
+        habitData.hasFinancialImpact = true;
+        if (formData.estimatedCostPerOccurrence.trim()) {
+          habitData.estimatedCostPerOccurrence = parseFloat(formData.estimatedCostPerOccurrence);
+        }
+      }
+
       const success = await createHabit(habitData);
 
       if (success) {
@@ -134,7 +146,10 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
           customDays: [],
           hasTimeSchedule: false,
           dailyTimes: [],
-          schedules: []
+          schedules: [],
+          hasFinancialImpact: false,
+          estimatedCostPerOccurrence: '',
+          createAutomaticTasks: true
         });
         onClose();
       }
@@ -454,6 +469,80 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
                 )}
               </div>
             )}
+
+            {/* Financial Impact Section */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.hasFinancialImpact}
+                  onChange={(e) => setFormData(prev => ({ ...prev, hasFinancialImpact: e.target.checked }))}
+                  className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Cette habitude a un impact financier
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {formData.type === 'bad'
+                  ? 'Coût de cette mauvaise habitude (pour calculer les économies en l\'évitant)'
+                  : 'Coût de cette bonne habitude (investissement dans votre bien-être)'
+                }
+              </p>
+            </div>
+
+            {/* Financial Cost Input */}
+            {formData.hasFinancialImpact && (
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <Input
+                  label={`Coût estimé par occurrence (FCFA)`}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.estimatedCostPerOccurrence}
+                  onChange={(value) => setFormData(prev => ({ ...prev, estimatedCostPerOccurrence: value }))}
+                  placeholder="ex: 2500"
+                  helperText={
+                    formData.type === 'bad'
+                      ? 'Montant que vous dépensez à chaque fois que vous cédez à cette habitude'
+                      : 'Montant que vous investissez à chaque fois pour cette bonne habitude'
+                  }
+                />
+
+                {formData.estimatedCostPerOccurrence && formData.frequency && (
+                  <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded border">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      💰 Impact financier estimé :
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {formData.frequency === 'daily' && `${(parseFloat(formData.estimatedCostPerOccurrence) * 30).toFixed(0)} FCFA par mois`}
+                      {formData.frequency === 'weekly' && `${(parseFloat(formData.estimatedCostPerOccurrence) * 4).toFixed(0)} FCFA par mois`}
+                      {formData.frequency === 'custom' && formData.customDays.length > 0 &&
+                        `${(parseFloat(formData.estimatedCostPerOccurrence) * formData.customDays.length * 4).toFixed(0)} FCFA par mois`
+                      }
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Automatic Task Creation */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.createAutomaticTasks}
+                  onChange={(e) => setFormData(prev => ({ ...prev, createAutomaticTasks: e.target.checked }))}
+                  className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Créer automatiquement des tâches récurrentes
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Une tâche sera automatiquement créée dans le module Tâches pour suivre cette habitude
+              </p>
+            </div>
 
             <div className="flex gap-3 pt-4">
               <Button

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Transaction, TransactionCategory } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { useTasks } from '@/src/presentation/hooks/useTasks';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
@@ -21,6 +22,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   onClose
 }) => {
   const { accounts, categories, createTransaction, createCategory, error } = useFinance();
+  const { tasks } = useTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,6 +33,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
     subcategory: '',
     sourceAccountId: '',
     destinationAccountId: '',
+    linkedTaskId: '',
     tags: [] as string[],
     location: '',
     date: new Date().toISOString().split('T')[0],
@@ -126,6 +129,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
         status: formData.status,
         sourceAccountId: formData.sourceAccountId || undefined,
         destinationAccountId: formData.destinationAccountId || undefined,
+        linkedTaskId: formData.linkedTaskId || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         location: formData.location.trim() || undefined,
         date: new Date(formData.date),
@@ -142,6 +146,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           subcategory: '',
           sourceAccountId: '',
           destinationAccountId: '',
+          linkedTaskId: '',
           tags: [],
           location: '',
           date: new Date().toISOString().split('T')[0],
@@ -173,6 +178,13 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   ];
 
   const accountOptions = getAccountOptions();
+
+  const taskOptions = [
+    { value: '', label: 'Aucune tâche liée' },
+    ...tasks
+      .filter(task => task.status !== 'completed' && task.status !== 'cancelled')
+      .map(task => ({ value: task.id, label: task.title }))
+  ];
 
   return (
     <Modal
@@ -350,6 +362,15 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
             />
           )}
         </div>
+
+        {/* Liaison avec tâche */}
+        <Select
+          label="Tâche liée (optionnel)"
+          value={formData.linkedTaskId}
+          onChange={(value) => setFormData({ ...formData, linkedTaskId: value })}
+          options={taskOptions}
+          helperText="Associer cette transaction à une tâche en cours"
+        />
 
         {/* Statut */}
         <Select

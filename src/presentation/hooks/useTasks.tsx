@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { TaskRepository } from '@/src/data/repositories/taskRepository';
+import { FinanceRepository } from '@/src/data/repositories/financeRepository';
 import { Task, TaskCategory, TaskTimeEntry, StatusHistoryEntry } from '@/src/shared/types';
 
 const taskRepository = new TaskRepository();
+const financeRepository = new FinanceRepository();
 
 export const useTasks = () => {
   const { user } = useAuth();
@@ -184,6 +186,11 @@ export const useTasks = () => {
       ...(status === 'completed' && { completedAt: now })
     };
 
+    // 🔥 SYNCHRONISATION AUTOMATIQUE : Tâche terminée → Confirmer transaction liée
+    if (status === 'completed' && currentTask.transactionId) {
+      await confirmLinkedTransaction(currentTask.transactionId, currentTask);
+    }
+
     return await updateTask(taskId, updates);
   };
 
@@ -359,6 +366,32 @@ export const useTasks = () => {
     } catch (err) {
       console.error('Error fetching time entries:', err);
       return [];
+    }
+  };
+
+  const confirmLinkedTransaction = async (transactionId: string, task: Task) => {
+    try {
+      const updatedTransaction = {
+        status: 'completed' as const,
+        description: `Transaction confirmée automatiquement suite à la completion de la tâche: ${task.title}`,
+        updatedAt: new Date()
+      };
+
+      await financeRepository.updateTransaction(transactionId, updatedTransaction);
+
+      console.log(`✅ Transaction ${transactionId} confirmée automatiquement pour la tâche: ${task.title}`);
+
+      // Si la tâche a un impact financier estimé, on peut mettre à jour le montant réel
+      if (task.estimatedCost && task.estimatedCost > 0) {
+        await financeRepository.updateTransaction(transactionId, {
+          amount: task.estimatedCost,
+          description: `Transaction confirmée automatiquement suite à la completion de la tâche: ${task.title} - Montant basé sur le coût estimé de la tâche.`
+        });
+      }
+
+    } catch (error) {
+      console.error('Erreur lors de la confirmation automatique de la transaction:', error);
+      // Ne pas faire échouer la completion de la tâche si la transaction échoue
     }
   };
 
