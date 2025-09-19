@@ -7,7 +7,6 @@ import { useTasks } from '@/src/presentation/hooks/useTasks';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
-import Textarea from '@/src/presentation/components/ui/Textarea';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import TagInput from '@/src/presentation/components/ui/TagInput';
@@ -374,9 +373,6 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           options={taskOptions}
           helperText="Associer cette transaction à une tâche en cours"
         />
-
-        {/* Debug - à supprimer après test */}
-        {console.log('Budgets disponibles:', budgets, 'Actifs:', budgets.filter(b => b.isActive))}
 
         {/* Liaison avec budget - seulement pour les dépenses */}
         {formData.type === 'expense' && (

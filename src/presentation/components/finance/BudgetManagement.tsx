@@ -13,7 +13,7 @@ import BudgetTransferModal from './BudgetTransferModal';
 import BudgetTransactions from './BudgetTransactions';
 
 const BudgetManagement: React.FC = () => {
-  const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useFinance();
+  const { budgets, loading, createBudget, updateBudget, deleteBudget } = useFinance();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [transferBudget, setTransferBudget] = useState<Budget | null>(null);

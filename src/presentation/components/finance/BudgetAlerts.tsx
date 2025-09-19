@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useBudgetAlerts } from '@/src/presentation/hooks/useBudgetAlerts';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { Budget } from '@/src/shared/types';
 import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
@@ -11,7 +12,7 @@ import BudgetTransferModal from './BudgetTransferModal';
 const BudgetAlerts: React.FC = () => {
   const { alerts, loading, dismissAlert } = useBudgetAlerts();
   const { budgets } = useFinance();
-  const [transferBudget, setTransferBudget] = useState<any>(null);
+  const [transferBudget, setTransferBudget] = useState<Budget | null>(null);
 
   if (loading) {
     return (

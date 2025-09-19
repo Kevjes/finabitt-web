@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Button from '@/src/presentation/components/ui/Button';
 
 export default function FinanceLayout({
   children,

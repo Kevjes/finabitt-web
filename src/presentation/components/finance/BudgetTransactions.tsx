@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
-import { Budget, Transaction } from '@/src/shared/types';
+import { Budget } from '@/src/shared/types';
 import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
