@@ -227,7 +227,7 @@ const BudgetsGoalsOverview: React.FC = () => {
                   {goalStats.totalSaved.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
-                  {goalStats.totalTarget > 0 ? ((goalStats.totalSaved / goalStats.totalTarget) * 100).toFixed(1) : 0}% de l'objectif
+                  {goalStats.totalTarget > 0 ? ((goalStats.totalSaved / goalStats.totalTarget) * 100).toFixed(1) : 0}% de l&apos;objectif
                 </p>
               </div>
             </div>
@@ -257,7 +257,7 @@ const BudgetsGoalsOverview: React.FC = () => {
                   {goalStats.completedGoals}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Terminés, {goalStats.nearTarget} proche de l'objectif
+                  Terminés, {goalStats.nearTarget} proche de l&apos;objectif
                 </p>
               </div>
             </div>

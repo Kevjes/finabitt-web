@@ -11,7 +11,6 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  writeBatch,
   getDoc
 } from 'firebase/firestore';
 import { db } from '@/src/infrastructure/firebase/config';

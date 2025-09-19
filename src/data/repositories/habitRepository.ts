@@ -30,8 +30,8 @@ export class HabitRepository {
     return docRef.id;
   }
 
-  private cleanHabitData(habit: any): any {
-    const cleaned: any = {};
+  private cleanHabitData(habit: Record<string, unknown>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.keys(habit).forEach(key => {
       const value = habit[key];

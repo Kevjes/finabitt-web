@@ -12,7 +12,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '@/src/infrastructure/firebase/config';
-import { Task, TaskCategory, TaskComment, TaskTimeEntry } from '@/src/shared/types';
+import { Task, TaskCategory, TaskTimeEntry } from '@/src/shared/types';
 
 export class TaskRepository {
   private tasksCollection = 'tasks';
@@ -33,8 +33,8 @@ export class TaskRepository {
     return docRef.id;
   }
 
-  private cleanTaskData(task: any): any {
-    const cleaned: any = {};
+  private cleanTaskData(task: Record<string, unknown>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.keys(task).forEach(key => {
       const value = task[key];
@@ -170,8 +170,8 @@ export class TaskRepository {
     return docRef.id;
   }
 
-  private cleanCategoryData(category: any): any {
-    const cleaned: any = {};
+  private cleanCategoryData(category: Record<string, unknown>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.keys(category).forEach(key => {
       const value = category[key];

@@ -36,8 +36,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
 
     try {
       await signUp(email, password);
-    } catch (error: any) {
-      switch (error.code) {
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      switch (firebaseError.code) {
         case 'auth/email-already-in-use':
           setError('Cette adresse email est déjà utilisée.');
           break;

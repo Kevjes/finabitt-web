@@ -296,7 +296,7 @@ const AccountRulesManagement: React.FC<AccountRulesManagementProps> = ({ account
                 <Select
                   label="Déclencheur *"
                   value={formData.triggerType}
-                  onChange={(value) => setFormData({ ...formData, triggerType: value as any })}
+                  onChange={(value) => setFormData({ ...formData, triggerType: value as 'on_income' | 'on_expense' | 'scheduled' })}
                   options={[
                     { value: 'on_income', label: 'À chaque revenu' },
                     { value: 'on_expense', label: 'À chaque dépense' },
@@ -309,7 +309,7 @@ const AccountRulesManagement: React.FC<AccountRulesManagementProps> = ({ account
                   <Select
                     label="Fréquence"
                     value={formData.frequency}
-                    onChange={(value) => setFormData({ ...formData, frequency: value as any })}
+                    onChange={(value) => setFormData({ ...formData, frequency: value as 'daily' | 'weekly' | 'monthly' | 'yearly' })}
                     options={[
                       { value: 'daily', label: 'Quotidien' },
                       { value: 'weekly', label: 'Hebdomadaire' },

@@ -336,7 +336,7 @@ export interface Suggestion {
   type: 'transfer' | 'budget_alert' | 'habit_reward' | 'task_organization' | 'goal_contribution';
   title: string;
   description: string;
-  data: any; // Données spécifiques à la suggestion
+  data: Record<string, unknown>; // Données spécifiques à la suggestion
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'accepted' | 'rejected' | 'expired';
   expiresAt?: Date;
@@ -350,7 +350,7 @@ export interface Notification {
   type: 'suggestion' | 'alert' | 'reminder' | 'achievement' | 'budget_warning';
   title: string;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
   isRead: boolean;
   priority: 'low' | 'medium' | 'high';
   createdAt: Date;

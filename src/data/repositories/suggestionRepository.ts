@@ -12,7 +12,6 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
-  getDoc,
   limit
 } from 'firebase/firestore';
 import { db } from '@/src/infrastructure/firebase/config';

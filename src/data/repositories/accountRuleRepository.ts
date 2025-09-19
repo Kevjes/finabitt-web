@@ -21,8 +21,8 @@ import { AccountRule } from '@/src/shared/types';
 export class AccountRuleRepository {
   private readonly collection = 'accountRules';
 
-  private cleanAccountRuleData(data: Partial<AccountRule>): any {
-    const cleaned: any = {};
+  private cleanAccountRuleData(data: Partial<AccountRule>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -290,7 +290,7 @@ export class AccountRuleRepository {
     }
 
     const now = new Date();
-    let nextDate = new Date(now);
+    const nextDate = new Date(now);
 
     switch (rule.frequency) {
       case 'daily':

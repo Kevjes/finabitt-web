@@ -73,9 +73,9 @@ export class HabitFinanceSyncService {
       amount: savingsAmount,
       goalId,
       goalName,
-      description: `Transférer ${savingsAmount.toFixed(0)} FCFA économisés grâce à l'abandon de "${habit.name}"`,
+      description: `Transférer ${savingsAmount.toFixed(0)} FCFA économisés grâce à l&apos;abandon de "${habit.name}"`,
       reason: habit.type === 'bad'
-        ? `Vous avez évité cette mauvaise habitude et économisé de l'argent !`
+        ? `Vous avez évité cette mauvaise habitude et économisé de l&apos;argent !`
         : `Votre bonne habitude a un impact financier positif`,
       suggestedAt: new Date()
     };
@@ -172,7 +172,7 @@ export class HabitFinanceSyncService {
           userId: '',
           type: 'goal_contribution',
           title: 'Créer un objectif d\'épargne',
-          description: `L'habitude "${habit.name}" a un impact financier. Voulez-vous créer un objectif d'épargne pour y transférer automatiquement les économies réalisées ?`,
+          description: `l&apos;habitude "${habit.name}" a un impact financier. Voulez-vous créer un objectif d'épargne pour y transférer automatiquement les économies réalisées ?`,
           data: {
             habitId: habit.id,
             suggestedAmount: (habit.estimatedCostPerOccurrence || 0) * 30, // Estimation mensuelle
@@ -195,7 +195,7 @@ export class HabitFinanceSyncService {
   analyzeHabitExpenseCorrelation(
     habits: Habit[],
     progressData: HabitProgress[],
-    transactions: any[], // Type Transaction importé depuis types
+    transactions: Transaction[], // Type Transaction importé depuis types
     categoryName: string
   ): {
     correlation: number;
@@ -236,7 +236,7 @@ export class HabitFinanceSyncService {
           insights.push(`Excellent ! Vous évitez "${habit.name}" dans 70%+ des cas.`);
         } else if (successRate < 0.3) {
           insights.push(`Attention : "${habit.name}" est pratiquée trop souvent.`);
-          suggestedActions.push(`Concentrez-vous sur l'arrêt de "${habit.name}" pour réduire vos dépenses en ${categoryName}.`);
+          suggestedActions.push(`Concentrez-vous sur l&apos;arrêt de "${habit.name}" pour réduire vos dépenses en ${categoryName}.`);
         }
       }
     });

@@ -208,7 +208,7 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
         {/* Seuil d'alerte */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Seuil d'alerte
+            Seuil d&apos;alerte
           </label>
           <div className="space-y-2">
             {thresholdOptions.map((option) => (

@@ -24,7 +24,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
     try {
       await signIn(email, password);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError('Identifiants incorrects. Veuillez réessayer.');
     } finally {
       setLoading(false);
