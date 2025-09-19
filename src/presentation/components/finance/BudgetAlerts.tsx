@@ -1,12 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { useBudgetAlerts } from '@/src/presentation/hooks/useBudgetAlerts';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
 import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
+import BudgetTransferModal from './BudgetTransferModal';
 
 const BudgetAlerts: React.FC = () => {
   const { alerts, loading, dismissAlert } = useBudgetAlerts();
+  const { budgets } = useFinance();
+  const [transferBudget, setTransferBudget] = useState<any>(null);
 
   if (loading) {
     return (
@@ -164,23 +169,36 @@ const BudgetAlerts: React.FC = () => {
               >
                 Voir les dépenses
               </Button>
-              {alert.severity === 'critical' && (
+              {alert.percentage > 100 && (
                 <Button
                   size="sm"
                   variant="primary"
-                  className="text-xs bg-red-600 hover:bg-red-700"
+                  className="text-xs bg-blue-600 hover:bg-blue-700"
                   onClick={() => {
-                    // TODO: Créer une suggestion de compensation
-                    console.log('Créer plan de compensation:', alert.budgetId);
+                    const budget = budgets.find(b => b.id === alert.budgetId);
+                    if (budget) setTransferBudget(budget);
                   }}
                 >
-                  Plan de compensation
+                  Transférer des fonds
                 </Button>
               )}
             </div>
           </div>
         </Card>
       ))}
+
+      {/* Modal de transfert */}
+      {transferBudget && (
+        <BudgetTransferModal
+          isOpen={!!transferBudget}
+          onClose={() => setTransferBudget(null)}
+          sourceBudget={transferBudget}
+          onTransferComplete={() => {
+            setTransferBudget(null);
+            window.location.reload(); // Actualiser les données
+          }}
+        />
+      )}
     </div>
   );
 };

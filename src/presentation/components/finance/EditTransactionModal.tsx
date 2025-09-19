@@ -21,7 +21,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { accounts, categories, updateTransaction, deleteTransaction, error } = useFinance();
+  const { accounts, categories, budgets, updateTransaction, deleteTransaction, error } = useFinance();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -33,7 +33,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     tags: [] as string[],
     location: '',
     date: '',
-    status: 'completed' as Transaction['status']
+    status: 'completed' as Transaction['status'],
+    linkedBudgetId: ''
   });
 
   useEffect(() => {
@@ -46,7 +47,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         tags: transaction.tags || [],
         location: transaction.location || '',
         date: transaction.date.toISOString().split('T')[0],
-        status: transaction.status
+        status: transaction.status,
+        linkedBudgetId: transaction.linkedBudgetId || ''
       });
     }
   }, [transaction]);
@@ -96,7 +98,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         location: formData.location.trim() || undefined,
         date: new Date(formData.date),
-        status: formData.status
+        status: formData.status,
+        linkedBudgetId: formData.linkedBudgetId || undefined
       };
 
       const success = await updateTransaction(transaction.id, updates);
@@ -269,6 +272,25 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             onChange={(tags) => setFormData({ ...formData, tags })}
             placeholder="Ajouter des tags..."
           />
+
+          {/* Budget lié - seulement pour les dépenses */}
+          {transaction.type === 'expense' && (
+            <Select
+              label="Budget associé (optionnel)"
+              value={formData.linkedBudgetId}
+              onChange={(value) => setFormData({ ...formData, linkedBudgetId: value })}
+              options={[
+                { value: '', label: 'Aucun budget' },
+                ...budgets
+                  .filter(budget => budget.isActive)
+                  .map(budget => ({
+                    value: budget.id,
+                    label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`
+                  }))
+              ]}
+              helperText="Associer cette dépense à un budget spécifique"
+            />
+          )}
 
           <Input
             label="Lieu"

@@ -17,7 +17,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   transaction,
   compact = false
 }) => {
-  const { accounts } = useFinance();
+  const { accounts, budgets } = useFinance();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const getTransactionTypeInfo = (type: Transaction['type']) => {
@@ -66,6 +66,12 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
     if (!accountId) return 'Compte supprimé';
     const account = accounts.find(a => a.id === accountId);
     return account?.name || 'Compte inconnu';
+  };
+
+  const getBudgetName = (budgetId?: string) => {
+    if (!budgetId) return null;
+    const budget = budgets.find(b => b.id === budgetId);
+    return budget?.name;
   };
 
   const typeInfo = getTransactionTypeInfo(transaction.type);
@@ -174,6 +180,15 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
               </p>
             )}
           </div>
+
+          {/* Budget lié */}
+          {transaction.linkedBudgetId && getBudgetName(transaction.linkedBudgetId) && (
+            <div className="text-sm">
+              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full">
+                💰 Budget: {getBudgetName(transaction.linkedBudgetId)}
+              </span>
+            </div>
+          )}
 
           {/* Informations supplémentaires */}
           {(transaction.tags?.length || transaction.location) && (

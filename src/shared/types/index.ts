@@ -188,6 +188,7 @@ export interface Transaction {
   sourceAccountId?: string; // Pour les dépenses et virements
   destinationAccountId?: string; // Pour les revenus et virements
   linkedTaskId?: string; // Lien avec module tâches
+  linkedBudgetId?: string; // Lien avec un budget spécifique
   tags?: string[];
   receipt?: string; // URL du reçu/justificatif
   location?: string; // Lieu de la transaction

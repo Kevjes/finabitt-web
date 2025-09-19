@@ -21,7 +21,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { accounts, categories, createTransaction, createCategory, error } = useFinance();
+  const { accounts, categories, budgets, createTransaction, createCategory, error } = useFinance();
   const { tasks } = useTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
@@ -34,6 +34,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
     sourceAccountId: '',
     destinationAccountId: '',
     linkedTaskId: '',
+    linkedBudgetId: '',
     tags: [] as string[],
     location: '',
     date: new Date().toISOString().split('T')[0],
@@ -130,6 +131,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
         sourceAccountId: formData.sourceAccountId || undefined,
         destinationAccountId: formData.destinationAccountId || undefined,
         linkedTaskId: formData.linkedTaskId || undefined,
+        linkedBudgetId: formData.linkedBudgetId || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         location: formData.location.trim() || undefined,
         date: new Date(formData.date),
@@ -147,6 +149,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           sourceAccountId: '',
           destinationAccountId: '',
           linkedTaskId: '',
+          linkedBudgetId: '',
           tags: [],
           location: '',
           date: new Date().toISOString().split('T')[0],
@@ -371,6 +374,28 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           options={taskOptions}
           helperText="Associer cette transaction à une tâche en cours"
         />
+
+        {/* Debug - à supprimer après test */}
+        {console.log('Budgets disponibles:', budgets, 'Actifs:', budgets.filter(b => b.isActive))}
+
+        {/* Liaison avec budget - seulement pour les dépenses */}
+        {formData.type === 'expense' && (
+          <Select
+            label="Budget associé (optionnel)"
+            value={formData.linkedBudgetId}
+            onChange={(value) => setFormData({ ...formData, linkedBudgetId: value })}
+            options={[
+              { value: '', label: 'Aucun budget' },
+              ...budgets
+                .filter(budget => budget.isActive)
+                .map(budget => ({
+                  value: budget.id,
+                  label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`
+                }))
+            ]}
+            helperText={`Décompter cette dépense d'un budget spécifique (${budgets.filter(b => b.isActive).length} budgets disponibles)`}
+          />
+        )}
 
         {/* Statut */}
         <Select

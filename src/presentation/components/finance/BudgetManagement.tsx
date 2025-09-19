@@ -3,17 +3,21 @@
 import { useState } from 'react';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
 import { Budget } from '@/src/shared/types';
-import { formatAmount } from '@/src/shared/utils/currency';
+import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
 import Textarea from '@/src/presentation/components/ui/Textarea';
+import BudgetTransferModal from './BudgetTransferModal';
+import BudgetTransactions from './BudgetTransactions';
 
 const BudgetManagement: React.FC = () => {
   const { budgets, loading, error, createBudget, updateBudget, deleteBudget } = useFinance();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [transferBudget, setTransferBudget] = useState<Budget | null>(null);
+  const [viewingBudget, setViewingBudget] = useState<Budget | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -83,6 +87,13 @@ const BudgetManagement: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => setViewingBudget(budget)}
+                  >
+                    Voir détails
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => {
                       setEditingBudget(budget);
                       setFormData({
@@ -115,11 +126,16 @@ const BudgetManagement: React.FC = () => {
 
               <div className="text-right mb-3">
                 <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {formatAmount(budget.spent, 'FCFA')} / {formatAmount(budget.amount, 'FCFA')}
+                  {formatAmount(budget.spent, DEFAULT_CURRENCY)} / {formatAmount(budget.amount, DEFAULT_CURRENCY)}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   {Math.round((budget.spent / budget.amount) * 100)}% utilisé
                 </div>
+                {budget.spent > budget.amount && (
+                  <div className="text-sm font-medium text-red-600 dark:text-red-400 mt-1">
+                    Dépassement: {formatAmount(budget.spent - budget.amount, DEFAULT_CURRENCY)}
+                  </div>
+                )}
               </div>
 
               {/* Barre de progression */}
@@ -138,7 +154,7 @@ const BudgetManagement: React.FC = () => {
                 ></div>
               </div>
 
-              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                 <span>Période: {
                   budget.period === 'weekly' ? 'Hebdomadaire' :
                   budget.period === 'monthly' ? 'Mensuel' :
@@ -147,6 +163,25 @@ const BudgetManagement: React.FC = () => {
                 }</span>
                 <span>Alerte: {budget.alertThreshold}%</span>
               </div>
+
+              {/* Actions pour budget dépassé */}
+              {budget.spent > budget.amount && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-red-600 dark:text-red-400 font-medium">
+                      💡 Actions suggérées
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setTransferBudget(budget)}
+                      className="text-blue-600 hover:text-blue-700 border-blue-300 hover:border-blue-400"
+                    >
+                      Transférer des fonds
+                    </Button>
+                  </div>
+                </div>
+              )}
             </Card>
           ))}
         </div>
@@ -289,6 +324,107 @@ const BudgetManagement: React.FC = () => {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de transfert entre budgets */}
+      {transferBudget && (
+        <BudgetTransferModal
+          isOpen={!!transferBudget}
+          onClose={() => setTransferBudget(null)}
+          sourceBudget={transferBudget}
+          onTransferComplete={() => {
+            // Actualiser les données après le transfert
+            window.location.reload(); // Solution simple, on pourrait optimiser avec refetch
+          }}
+        />
+      )}
+
+      {/* Modal de détails du budget */}
+      {viewingBudget && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {viewingBudget.name}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {viewingBudget.category} • {
+                      viewingBudget.period === 'weekly' ? 'Hebdomadaire' :
+                      viewingBudget.period === 'monthly' ? 'Mensuel' :
+                      viewingBudget.period === 'quarterly' ? 'Trimestriel' :
+                      'Annuel'
+                    }
+                  </p>
+                </div>
+                <button
+                  onClick={() => setViewingBudget(null)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Budget overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formatAmount(viewingBudget.amount, DEFAULT_CURRENCY)}
+                    </div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">
+                      Budget total
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      {formatAmount(viewingBudget.spent, DEFAULT_CURRENCY)}
+                    </div>
+                    <div className="text-sm text-red-600 dark:text-red-400">
+                      Dépensé
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className={`${
+                  viewingBudget.amount - viewingBudget.spent >= 0
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                }`}>
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${
+                      viewingBudget.amount - viewingBudget.spent >= 0
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}>
+                      {formatAmount(viewingBudget.amount - viewingBudget.spent, DEFAULT_CURRENCY)}
+                    </div>
+                    <div className={`text-sm ${
+                      viewingBudget.amount - viewingBudget.spent >= 0
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {viewingBudget.amount - viewingBudget.spent >= 0 ? 'Restant' : 'Dépassement'}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Budget transactions */}
+              <BudgetTransactions budget={viewingBudget} />
+
+              <div className="flex justify-end mt-6">
+                <Button onClick={() => setViewingBudget(null)}>
+                  Fermer
+                </Button>
+              </div>
             </div>
           </div>
         </div>

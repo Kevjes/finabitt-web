@@ -152,6 +152,11 @@ export const useFinance = () => {
       // Déclencher les règles automatiques si la transaction est complétée
       if (newTransaction.status === 'completed') {
         await triggerAccountRules(createdTransaction);
+
+        // Mettre à jour le budget associé si c'est une dépense liée à un budget
+        if (newTransaction.type === 'expense' && newTransaction.linkedBudgetId) {
+          await updateBudgetSpending(newTransaction.linkedBudgetId, newTransaction.amount);
+        }
       }
 
       // Recharger immédiatement puis après un délai pour être sûr
@@ -331,6 +336,24 @@ export const useFinance = () => {
       setError('Erreur lors de la mise à jour du budget');
       console.error('Error updating budget:', err);
       await loadFinanceData();
+      return false;
+    }
+  };
+
+  // Fonction pour mettre à jour les dépenses d'un budget
+  const updateBudgetSpending = async (budgetId: string, amount: number) => {
+    try {
+      const budget = budgets.find(b => b.id === budgetId);
+      if (!budget) {
+        console.error('Budget not found:', budgetId);
+        return false;
+      }
+
+      const newSpentAmount = budget.spent + amount;
+      await updateBudget(budgetId, { spent: newSpentAmount });
+      return true;
+    } catch (err) {
+      console.error('Error updating budget spending:', err);
       return false;
     }
   };

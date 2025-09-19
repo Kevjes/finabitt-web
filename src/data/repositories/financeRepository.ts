@@ -233,7 +233,6 @@ export class FinanceRepository {
     const q = query(
       collection(db, this.budgetsCollection),
       where('userId', '==', userId),
-      where('isActive', '==', true),
       orderBy('createdAt', 'desc')
     );
 

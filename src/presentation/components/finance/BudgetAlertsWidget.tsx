@@ -1,13 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useBudgetAlerts } from '@/src/presentation/hooks/useBudgetAlerts';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
 import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
+import BudgetTransferModal from './BudgetTransferModal';
 
 const BudgetAlertsWidget: React.FC = () => {
   const { alerts, loading, getCriticalAlerts, getTotalAlertsCount } = useBudgetAlerts();
+  const { budgets } = useFinance();
+  const [transferBudget, setTransferBudget] = useState<any>(null);
 
   if (loading) {
     return (
@@ -110,6 +115,21 @@ const BudgetAlertsWidget: React.FC = () => {
                   {formatAmount(alert.budgetAmount, DEFAULT_CURRENCY)}
                 </span>
               </div>
+              {alert.percentage > 100 && (
+                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const budget = budgets.find(b => b.id === alert.budgetId);
+                      if (budget) setTransferBudget(budget);
+                    }}
+                    className="w-full text-xs text-blue-600 hover:text-blue-700 border-blue-300 hover:border-blue-400"
+                  >
+                    Transférer des fonds
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
 
@@ -136,6 +156,19 @@ const BudgetAlertsWidget: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de transfert */}
+      {transferBudget && (
+        <BudgetTransferModal
+          isOpen={!!transferBudget}
+          onClose={() => setTransferBudget(null)}
+          sourceBudget={transferBudget}
+          onTransferComplete={() => {
+            setTransferBudget(null);
+            window.location.reload(); // Actualiser les données
+          }}
+        />
+      )}
     </Card>
   );
 };
