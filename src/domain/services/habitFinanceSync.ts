@@ -1,6 +1,6 @@
 'use client';
 
-import { Habit, HabitProgress, Goal, Suggestion } from '@/src/shared/types';
+import { Habit, HabitProgress, Goal, Suggestion, Transaction } from '@/src/shared/types';
 
 export interface HabitFinancialImpact {
   habitId: string;

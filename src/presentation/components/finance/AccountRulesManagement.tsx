@@ -309,7 +309,7 @@ const AccountRulesManagement: React.FC<AccountRulesManagementProps> = ({ account
                   <Select
                     label="Fréquence"
                     value={formData.frequency}
-                    onChange={(value) => setFormData({ ...formData, frequency: value as 'daily' | 'weekly' | 'monthly' | 'yearly' })}
+                    onChange={(value) => setFormData({ ...formData, frequency: value as 'daily' | 'weekly' | 'monthly' })}
                     options={[
                       { value: 'daily', label: 'Quotidien' },
                       { value: 'weekly', label: 'Hebdomadaire' },
