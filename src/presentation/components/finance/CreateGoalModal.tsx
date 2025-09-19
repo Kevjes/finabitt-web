@@ -181,7 +181,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
           <Textarea
             label="Description (optionnel)"
             value={formData.description}
-            onChange={(value) => setFormData({ ...formData, description: value })}
+            onChange={(value: string) => setFormData({ ...formData, description: value })}
             placeholder="Décrivez votre objectif en détail..."
             rows={3}
           />

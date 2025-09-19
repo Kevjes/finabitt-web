@@ -22,8 +22,8 @@ export class SuggestionRepository {
   private readonly suggestionsCollection = 'suggestions';
   private readonly notificationsCollection = 'notifications';
 
-  private cleanSuggestionData(data: Partial<Suggestion>): any {
-    const cleaned: any = {};
+  private cleanSuggestionData(data: Partial<Suggestion>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -147,9 +147,9 @@ export class SuggestionRepository {
       // Commit le batch seulement s'il y a des mutations
       try {
         await batch.commit();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Ignorer l'erreur si le batch est vide
-        if (!error?.message?.includes('cannot be empty')) {
+        if (!(error instanceof Error) || !error.message?.includes('cannot be empty')) {
           throw error;
         }
       }

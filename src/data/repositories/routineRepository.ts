@@ -20,8 +20,8 @@ import { Routine } from '@/src/shared/types';
 export class RoutineRepository {
   private readonly collection = 'routines';
 
-  private cleanRoutineData(data: Partial<Routine>): any {
-    const cleaned: any = {};
+  private cleanRoutineData(data: Partial<Routine>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {

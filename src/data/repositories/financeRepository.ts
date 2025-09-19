@@ -309,8 +309,8 @@ export class FinanceRepository {
   }
 
   // ===== HELPER METHODS =====
-  private cleanFinanceData(data: any): any {
-    const cleaned: any = {};
+  private cleanFinanceData(data: Record<string, unknown>): Record<string, unknown> {
+    const cleaned: Record<string, unknown> = {};
 
     Object.keys(data).forEach(key => {
       const value = data[key];
@@ -327,7 +327,7 @@ export class FinanceRepository {
     return cleaned;
   }
 
-  private async updateAccountBalances(batch: any, transaction: Transaction): Promise<void> {
+  private async updateAccountBalances(batch: ReturnType<typeof writeBatch>, transaction: Transaction): Promise<void> {
     if (transaction.type === 'income' && transaction.destinationAccountId) {
       const accountRef = doc(db, this.accountsCollection, transaction.destinationAccountId);
       batch.update(accountRef, {
@@ -356,7 +356,7 @@ export class FinanceRepository {
     }
   }
 
-  private async adjustAccountBalances(batch: any, oldTransaction: Transaction, newTransaction: Transaction): Promise<void> {
+  private async adjustAccountBalances(batch: ReturnType<typeof writeBatch>, oldTransaction: Transaction, newTransaction: Transaction): Promise<void> {
     // Annuler l'ancienne transaction
     if (oldTransaction.status === 'completed') {
       await this.reverseAccountBalances(batch, oldTransaction);
@@ -368,7 +368,7 @@ export class FinanceRepository {
     }
   }
 
-  private async reverseAccountBalances(batch: any, transaction: Transaction): Promise<void> {
+  private async reverseAccountBalances(batch: ReturnType<typeof writeBatch>, transaction: Transaction): Promise<void> {
     if (transaction.type === 'income' && transaction.destinationAccountId) {
       const accountRef = doc(db, this.accountsCollection, transaction.destinationAccountId);
       batch.update(accountRef, {

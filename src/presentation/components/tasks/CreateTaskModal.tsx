@@ -198,7 +198,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         <Textarea
           label="Description"
           value={formData.description}
-          onChange={(value) => setFormData({ ...formData, description: value })}
+          onChange={(value: string) => setFormData({ ...formData, description: value })}
           placeholder="Description détaillée de la tâche"
           rows={3}
         />

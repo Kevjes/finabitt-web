@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
+import Modal from '@/src/presentation/components/ui/Modal';
 import Button from '@/src/presentation/components/ui/Button';
 import Input from '@/src/presentation/components/ui/Input';
 import Textarea from '@/src/presentation/components/ui/Textarea';
@@ -266,7 +267,7 @@ const CreateHabitModal: React.FC<CreateHabitModalProps> = ({ isOpen, onClose }) 
             <Textarea
               label="Description"
               value={formData.description}
-              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
               placeholder="Décrivez votre habitude (optionnel)"
               rows={3}
             />
