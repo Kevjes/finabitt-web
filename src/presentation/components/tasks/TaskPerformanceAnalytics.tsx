@@ -9,21 +9,27 @@ const TaskPerformanceAnalytics: React.FC = () => {
 
   if (analytics.totalTasksCompleted === 0) {
     return (
-      <Card>
-        <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400 mb-4">
-            Aucune tâche terminée pour l'instant
-          </div>
-          <p className="text-sm text-gray-400">
-            Complétez quelques tâches pour voir vos analytics de performance
-          </p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-7xl mx-auto">
+          <Card>
+            <div className="text-center py-8">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
+                Aucune tâche terminée pour l'instant
+              </div>
+              <p className="text-sm text-gray-400">
+                Complétez quelques tâches pour voir vos analytics de performance
+              </p>
+            </div>
+          </Card>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Analytics de Performance
@@ -149,6 +155,8 @@ const TaskPerformanceAnalytics: React.FC = () => {
           ))}
         </div>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };

@@ -109,33 +109,41 @@ const HabitStreakVisualization: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="animate-pulse">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5, 6, 7].map(j => (
-                <div key={j} className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              ))}
-            </div>
-          </Card>
-        ))}
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map(j => (
+                    <div key={j} className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (streakData.length === 0) {
     return (
-      <Card>
-        <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400 mb-4">
-            Aucune habitude active trouvée
-          </div>
-          <p className="text-sm text-gray-400">
-            Créez des habitudes pour voir vos chaînes de progression
-          </p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-7xl mx-auto">
+          <Card>
+            <div className="text-center py-8">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
+                Aucune habitude active trouvée
+              </div>
+              <p className="text-sm text-gray-400">
+                Créez des habitudes pour voir vos chaînes de progression
+              </p>
+            </div>
+          </Card>
         </div>
-      </Card>
+      </div>
     );
   }
 
@@ -161,7 +169,9 @@ const HabitStreakVisualization: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -352,6 +362,8 @@ const HabitStreakVisualization: React.FC = () => {
             </div>
           </Card>
         ))}
+      </div>
+        </div>
       </div>
     </div>
   );

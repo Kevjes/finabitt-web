@@ -71,7 +71,9 @@ const ProductivityInsights: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -289,6 +291,8 @@ const ProductivityInsights: React.FC = () => {
           </p>
         </div>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };

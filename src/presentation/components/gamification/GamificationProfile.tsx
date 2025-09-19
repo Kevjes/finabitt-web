@@ -9,13 +9,17 @@ const GamificationProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="animate-pulse">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          </Card>
-        ))}
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -24,7 +28,9 @@ const GamificationProfile: React.FC = () => {
   const nextBadge = getNextBadgeToEarn();
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Profil de progression
@@ -209,6 +215,8 @@ const GamificationProfile: React.FC = () => {
           </div>
         </div>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };
