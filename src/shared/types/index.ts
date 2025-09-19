@@ -300,8 +300,18 @@ export interface UserBadge {
   id: string;
   userId: string;
   badgeId: string;
+  badge: Badge; // Badge complet pour faciliter l'affichage
   earnedAt: Date;
   notificationSent: boolean;
+  isNew?: boolean; // Pour marquer les nouveaux badges
+}
+
+export interface UserLevel {
+  id: string;
+  userId: string;
+  level: number;
+  totalPoints: number;
+  achievedAt: Date;
 }
 
 export interface UserStats {

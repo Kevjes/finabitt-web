@@ -9,6 +9,8 @@ import CategoryManagement from './CategoryManagement';
 import Button from '@/src/presentation/components/ui/Button';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
+import Link from 'next/link';
+import ProductivityWidget from '@/src/presentation/components/productivity/ProductivityWidget';
 
 interface TaskColumn {
   id: Task['status'];
@@ -99,6 +101,16 @@ const TaskDashboard: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
+          <Link href="/tasks/analytics">
+            <Button variant="outline" size="sm">
+              📈 Analytics
+            </Button>
+          </Link>
+          <Link href="/productivity/insights">
+            <Button variant="outline" size="sm">
+              🧠 Insights
+            </Button>
+          </Link>
           <Button
             variant="outline"
             onClick={() => setIsCategoryManagementOpen(true)}
@@ -157,6 +169,11 @@ const TaskDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Productivity Widget */}
+      <div className="mb-6">
+        <ProductivityWidget />
       </div>
 
       {/* Filters and Search */}

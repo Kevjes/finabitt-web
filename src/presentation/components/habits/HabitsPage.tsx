@@ -6,6 +6,8 @@ import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import HabitCard from './HabitCard';
 import CreateHabitModal from './CreateHabitModal';
+import HabitStreaksWidget from './HabitStreaksWidget';
+import Link from 'next/link';
 
 const HabitsPage: React.FC = () => {
   const { habits, loading, error } = useHabits();
@@ -40,12 +42,34 @@ const HabitsPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Mes Habitudes
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Suivez et développez vos habitudes quotidiennes
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Mes Habitudes
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Suivez et développez vos habitudes quotidiennes
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/habits/analytics">
+                <Button variant="outline" size="sm">
+                  📊 Analytics
+                </Button>
+              </Link>
+              <Button
+                variant="primary"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                + Nouvelle habitude
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Habit Streaks Widget */}
+        <div className="mb-6">
+          <HabitStreaksWidget />
         </div>
 
         {/* Stats Cards */}

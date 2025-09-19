@@ -8,6 +8,8 @@ import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
 import SuggestionPanel from '@/src/presentation/components/suggestions/SuggestionPanel';
+import GamificationWidget from '@/src/presentation/components/gamification/GamificationWidget';
+import BudgetAlertsWidget from '@/src/presentation/components/finance/BudgetAlertsWidget';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -144,13 +146,19 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
+        {/* Widgets avancés */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <GamificationWidget />
+          <BudgetAlertsWidget />
+        </div>
+
         {/* Suggestions intelligentes */}
         <SuggestionPanel className="mb-8" maxSuggestions={3} />
 
         {/* Quick Actions */}
         <Card shadow="lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Actions rapides</h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
             <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/habits'}>
               <div className="w-5 h-5 mb-1 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">+</span>
@@ -174,6 +182,18 @@ const Dashboard: React.FC = () => {
                 <span className="text-white text-xs font-bold">↕</span>
               </div>
               <span className="text-xs">Transaction</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/profile/achievements'}>
+              <div className="w-5 h-5 mb-1 bg-purple-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">🏆</span>
+              </div>
+              <span className="text-xs">Achievements</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/productivity/insights'}>
+              <div className="w-5 h-5 mb-1 bg-pink-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">📊</span>
+              </div>
+              <span className="text-xs">Insights</span>
             </Button>
           </div>
         </Card>
