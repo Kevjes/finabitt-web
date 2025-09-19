@@ -6,9 +6,7 @@ import TaskPerformanceAnalytics from '@/src/presentation/components/tasks/TaskPe
 export default function TaskAnalyticsPage() {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-6">
-        <TaskPerformanceAnalytics />
-      </div>
+      <TaskPerformanceAnalytics />
     </ProtectedRoute>
   );
 }

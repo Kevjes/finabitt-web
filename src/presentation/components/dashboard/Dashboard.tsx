@@ -129,11 +129,11 @@ const Dashboard: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Solde total</span>
-                <span className="font-medium">{financeLoading ? '...' : `${getTotalBalance().toFixed(2)} €`}</span>
+                <span className="font-medium">{financeLoading ? '...' : `${getTotalBalance().toFixed(0)} FCFA`}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Ce mois</span>
-                <span className="font-medium text-success">{financeLoading ? '...' : `+${getMonthlyIncome().toFixed(2)} €`}</span>
+                <span className="font-medium text-success">{financeLoading ? '...' : `+${getMonthlyIncome().toFixed(0)} FCFA`}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Comptes</span>
@@ -173,7 +173,7 @@ const Dashboard: React.FC = () => {
             </Button>
             <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/finances/accounts'}>
               <div className="w-5 h-5 mb-1 bg-success rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">€</span>
+                <span className="text-white text-xs font-bold">FCFA</span>
               </div>
               <span className="text-xs">Nouveau compte</span>
             </Button>

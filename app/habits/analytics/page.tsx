@@ -6,9 +6,7 @@ import HabitStreakVisualization from '@/src/presentation/components/habits/Habit
 export default function HabitAnalyticsPage() {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-6">
-        <HabitStreakVisualization />
-      </div>
+      <HabitStreakVisualization />
     </ProtectedRoute>
   );
 }

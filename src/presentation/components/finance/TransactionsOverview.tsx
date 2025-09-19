@@ -172,7 +172,7 @@ const TransactionsOverview: React.FC = () => {
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Revenus ce mois</p>
               <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                +{stats.monthlyIncome.toFixed(2)} €
+                +{stats.monthlyIncome.toFixed(0)} FCFA
               </p>
             </div>
           </div>
@@ -184,7 +184,7 @@ const TransactionsOverview: React.FC = () => {
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Dépenses ce mois</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
-                -{stats.monthlyExpenses.toFixed(2)} €
+                -{stats.monthlyExpenses.toFixed(0)} FCFA
               </p>
             </div>
           </div>
@@ -198,7 +198,7 @@ const TransactionsOverview: React.FC = () => {
               <p className={`text-xl font-bold ${
                 stats.netIncome >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}>
-                {stats.netIncome >= 0 ? '+' : ''}{stats.netIncome.toFixed(2)} €
+                {stats.netIncome >= 0 ? '+' : ''}{stats.netIncome.toFixed(0)} FCFA
               </p>
             </div>
           </div>

@@ -289,7 +289,7 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal }) => {
                     className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     placeholder="Montant"
                   />
-                  <span className="text-xs text-gray-500 py-1">€</span>
+                  <span className="text-xs text-gray-500 py-1">FCFA</span>
                 </div>
                 <div className="flex gap-2">
                   <Button

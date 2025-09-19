@@ -195,7 +195,7 @@ export const useFinance = () => {
             );
 
             if (result.executed) {
-              console.log(`Règle "${rule.name}" exécutée: ${result.transferAmount}€ transférés`);
+              console.log(`Règle "${rule.name}" exécutée: ${result.transferAmount} FCFA transférés`);
             }
           } catch (ruleError) {
             console.error(`Erreur lors de l'exécution de la règle ${rule.name}:`, ruleError);

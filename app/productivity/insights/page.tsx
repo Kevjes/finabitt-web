@@ -6,9 +6,7 @@ import ProductivityInsights from '@/src/presentation/components/productivity/Pro
 export default function ProductivityInsightsPage() {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-6">
-        <ProductivityInsights />
-      </div>
+      <ProductivityInsights />
     </ProtectedRoute>
   );
 }

@@ -68,7 +68,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
   const getAccountOptions = () => {
     return accounts.map(account => ({
       value: account.id,
-      label: `${account.name} (${account.currentBalance.toFixed(2)} €)`
+      label: `${account.name} (${account.currentBalance.toFixed(0)} FCFA)`
     }));
   };
 
@@ -202,7 +202,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
                   placeholder="0.00"
                   required
                 />
-                <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+                <span className="absolute right-3 top-2 text-gray-500 text-sm">FCFA</span>
               </div>
             </div>
 
@@ -249,7 +249,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 placeholder="0.00"
               />
-              <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+              <span className="absolute right-3 top-2 text-gray-500 text-sm">FCFA</span>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {suggestedContribution.toFixed(2)} €
+                    {suggestedContribution.toFixed(0)} FCFA
                   </p>
                   <p className="text-xs text-blue-500">par mois</p>
                 </div>
@@ -307,7 +307,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Montant cible:</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {formData.targetAmount.toFixed(2)} €
+                {formData.targetAmount.toFixed(0)} FCFA
               </span>
             </div>
             {formData.targetDate && (
@@ -322,7 +322,7 @@ const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Contribution mensuelle:</span>
                 <span className="font-medium text-green-600 dark:text-green-400">
-                  {formData.monthlyContribution.toFixed(2)} €
+                  {formData.monthlyContribution.toFixed(0)} FCFA
                 </span>
               </div>
             )}

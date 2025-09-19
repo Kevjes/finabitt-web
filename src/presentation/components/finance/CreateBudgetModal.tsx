@@ -180,7 +180,7 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
                 placeholder="0.00"
                 required
               />
-              <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+              <span className="absolute right-3 top-2 text-gray-500 text-sm">FCFA</span>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Montant:</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {formData.amount.toFixed(2)} €
+                {formData.amount.toFixed(0)} FCFA
               </span>
             </div>
             <div className="flex justify-between">
@@ -265,7 +265,7 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Alerte à:</span>
               <span className="font-medium text-orange-600 dark:text-orange-400">
-                {formData.alertThreshold}% ({(formData.amount * formData.alertThreshold / 100).toFixed(2)} €)
+                {formData.alertThreshold}% ({(formData.amount * formData.alertThreshold / 100).toFixed(0)} FCFA)
               </span>
             </div>
           </div>

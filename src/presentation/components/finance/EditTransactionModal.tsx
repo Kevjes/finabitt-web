@@ -164,7 +164,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             <div className="text-right">
               <p className={`text-lg font-bold ${typeInfo.color}`}>
                 {transaction.type === 'expense' ? '-' : '+'}
-                {transaction.amount.toFixed(2)} €
+                {transaction.amount.toFixed(0)} FCFA
               </p>
             </div>
           </div>
@@ -218,7 +218,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   placeholder="0.00"
                   required
                 />
-                <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+                <span className="absolute right-3 top-2 text-gray-500 text-sm">FCFA</span>
               </div>
             </div>
 

@@ -73,7 +73,7 @@ export class HabitFinanceSyncService {
       amount: savingsAmount,
       goalId,
       goalName,
-      description: `Transférer ${savingsAmount.toFixed(2)}€ économisés grâce à l'abandon de "${habit.name}"`,
+      description: `Transférer ${savingsAmount.toFixed(0)} FCFA économisés grâce à l'abandon de "${habit.name}"`,
       reason: habit.type === 'bad'
         ? `Vous avez évité cette mauvaise habitude et économisé de l'argent !`
         : `Votre bonne habitude a un impact financier positif`,
@@ -149,8 +149,8 @@ export class HabitFinanceSyncService {
             id: `habit_savings_${habit.id}_${Date.now()}`,
             userId: '', // Sera rempli par le service appelant
             type: 'habit_reward',
-            title: `Félicitations ! Économies de ${savings.toFixed(2)}€`,
-            description: `Grâce à vos efforts pour éviter "${habit.name}", vous avez économisé ${savings.toFixed(2)}€ cette semaine. Voulez-vous transférer cette somme vers ${linkedGoal ? linkedGoal.name : 'votre épargne'} ?`,
+            title: `Félicitations ! Économies de ${savings.toFixed(0)} FCFA`,
+            description: `Grâce à vos efforts pour éviter "${habit.name}", vous avez économisé ${savings.toFixed(0)} FCFA cette semaine. Voulez-vous transférer cette somme vers ${linkedGoal ? linkedGoal.name : 'votre épargne'} ?`,
             data: {
               habitId: habit.id,
               amount: savings,
@@ -269,7 +269,7 @@ export class HabitFinanceSyncService {
       p.completed === (habit.type === 'good')
     ).length * timeInvestmentMinutes;
 
-    const roi = totalTimeInvested > 0 ? totalSavings / (totalTimeInvested / 60) : 0; // €/heure
+    const roi = totalTimeInvested > 0 ? totalSavings / (totalTimeInvested / 60) : 0; // FCFA/heure
 
     let insights = '';
     if (roi > 50) {

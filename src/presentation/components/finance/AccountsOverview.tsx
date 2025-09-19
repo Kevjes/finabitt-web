@@ -95,7 +95,7 @@ const AccountsOverview: React.FC = () => {
               Solde total
             </p>
             <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {totalBalance.toFixed(2)} €
+              {totalBalance.toFixed(0)} FCFA
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
               Réparti sur {accounts.length} compte{accounts.length > 1 ? 's' : ''}
@@ -123,7 +123,7 @@ const AccountsOverview: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {stat.total.toFixed(2)} €
+                  {stat.total.toFixed(0)} FCFA
                 </p>
               </div>
             </div>

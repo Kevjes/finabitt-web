@@ -67,7 +67,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   const getAccountOptions = () => {
     return accounts.map(account => ({
       value: account.id,
-      label: `${account.name} (${account.currentBalance.toFixed(2)} €)`
+      label: `${account.name} (${account.currentBalance.toFixed(0)} FCFA)`
     }));
   };
 
@@ -252,7 +252,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
                 placeholder="0.00"
                 required
               />
-              <span className="absolute right-3 top-2 text-gray-500 text-sm">€</span>
+              <span className="absolute right-3 top-2 text-gray-500 text-sm">FCFA</span>
             </div>
           </div>
 

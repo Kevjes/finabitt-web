@@ -133,7 +133,7 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
             <div>
               <p className="text-gray-500">Solde actuel</p>
               <p className="font-medium text-gray-900 dark:text-gray-100">
-                {account.currentBalance.toFixed(2)} {account.currency}
+                {account.currentBalance.toFixed(0)} {account.currency}
               </p>
             </div>
             <div>

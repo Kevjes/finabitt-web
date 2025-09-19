@@ -147,7 +147,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Budget total</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {budgetStats.totalAllocated.toFixed(2)} €
+                  {budgetStats.totalAllocated.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   {budgetStats.activeBudgets} budgets actifs
@@ -162,7 +162,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Dépensé</p>
                 <p className="text-xl font-bold text-red-600 dark:text-red-400">
-                  {budgetStats.totalSpent.toFixed(2)} €
+                  {budgetStats.totalSpent.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   {((budgetStats.totalSpent / budgetStats.totalAllocated) * 100).toFixed(1)}% du budget
@@ -177,7 +177,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Disponible</p>
                 <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                  {budgetStats.remainingBudget.toFixed(2)} €
+                  {budgetStats.remainingBudget.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   Reste à dépenser
@@ -209,7 +209,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Objectif total</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {goalStats.totalTarget.toFixed(2)} €
+                  {goalStats.totalTarget.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   {goalStats.activeGoals} objectifs actifs
@@ -224,7 +224,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Économisé</p>
                 <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                  {goalStats.totalSaved.toFixed(2)} €
+                  {goalStats.totalSaved.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   {goalStats.totalTarget > 0 ? ((goalStats.totalSaved / goalStats.totalTarget) * 100).toFixed(1) : 0}% de l'objectif
@@ -239,7 +239,7 @@ const BudgetsGoalsOverview: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Reste à épargner</p>
                 <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {goalStats.remainingToSave.toFixed(2)} €
+                  {goalStats.remainingToSave.toFixed(0)} FCFA
                 </p>
                 <p className="text-xs text-gray-500">
                   Pour atteindre vos objectifs
