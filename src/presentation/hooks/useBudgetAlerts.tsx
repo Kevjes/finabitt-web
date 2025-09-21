@@ -110,9 +110,15 @@ export const useBudgetAlerts = () => {
 
     const newAlerts: BudgetAlert[] = [];
 
-    for (const budget of budgets) {
-      const spentAmount = calculateCategorySpending(budget.category);
-      const percentage = (spentAmount / budget.amount) * 100;
+    // Filtrer seulement les budgets actifs
+    const activeBudgets = budgets.filter(budget => budget.isActive);
+
+    for (const budget of activeBudgets) {
+      // 🔥 FIX: Utiliser budget.spent au lieu de recalculer par catégorie
+      const spentAmount = budget.spent;
+      const percentage = budget.amount > 0 ? (spentAmount / budget.amount) * 100 : 0;
+
+      console.log(`📊 Budget "${budget.name}": ${spentAmount}/${budget.amount} (${percentage.toFixed(1)}%) - Seuil: ${budget.alertThreshold}%`);
 
       // Générer une alerte si le seuil est dépassé
       if (percentage >= budget.alertThreshold) {
@@ -153,6 +159,7 @@ export const useBudgetAlerts = () => {
       }
     }
 
+    console.log(`🚨 ${newAlerts.length} alerte(s) générée(s) sur ${activeBudgets.length} budgets actifs`);
     setAlerts(newAlerts);
     setLoading(false);
   };

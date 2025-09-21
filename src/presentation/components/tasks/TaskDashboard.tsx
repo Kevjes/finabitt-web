@@ -254,7 +254,7 @@ const TaskDashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-3 max-h-300 overflow-y-auto">
                     {columnTasks.map(task => (
                       <TaskCard key={task.id} task={task} showCategory={false} />
                     ))}

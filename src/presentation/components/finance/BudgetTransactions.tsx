@@ -9,9 +9,10 @@ import Button from '@/src/presentation/components/ui/Button';
 
 interface BudgetTransactionsProps {
   budget: Budget;
+  onRecalculate?: () => void;
 }
 
-const BudgetTransactions: React.FC<BudgetTransactionsProps> = ({ budget }) => {
+const BudgetTransactions: React.FC<BudgetTransactionsProps> = ({ budget, onRecalculate }) => {
   const { transactions, accounts } = useFinance();
   const [showAll, setShowAll] = useState(false);
 
@@ -63,8 +64,20 @@ const BudgetTransactions: React.FC<BudgetTransactionsProps> = ({ budget }) => {
           <h4 className="font-semibold text-gray-900 dark:text-gray-100">
             Dépenses du budget ({budgetTransactions.length})
           </h4>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Total dépensé: {formatAmount(budget.spent, DEFAULT_CURRENCY)}
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total dépensé: {formatAmount(budget.spent, DEFAULT_CURRENCY)}
+            </div>
+            {onRecalculate && (
+              <Button
+                size="sm"
+                onClick={onRecalculate}
+                className="bg-primary hover:bg-primary/90 text-white"
+                title="Recalculer les métriques pour corriger les transactions non comptabilisées"
+              >
+                🔄 Actualiser
+              </Button>
+            )}
           </div>
         </div>
 

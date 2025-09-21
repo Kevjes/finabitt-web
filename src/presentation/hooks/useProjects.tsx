@@ -12,7 +12,13 @@ const projectRepository = new ProjectRepository();
 export const useProjects = () => {
   const { user } = useAuth();
   const { budgets, transactions, updateTransaction } = useFinance();
-  const { tasks, updateTask } = useTasks();
+
+  // Créer une fonction wrapper pour mettre à jour les transactions
+  const handleTransactionUpdate = (transactionId: string, updates: any) => {
+    updateTransaction(transactionId, updates);
+  };
+
+  const { tasks, updateTask } = useTasks(handleTransactionUpdate);
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectCategories, setProjectCategories] = useState<ProjectCategory[]>([]);
@@ -165,6 +171,44 @@ export const useProjects = () => {
     } catch (err) {
       console.error('Error updating project metrics:', err);
       return false;
+    }
+  };
+
+  // 🔧 FONCTION DE RECALCUL FORCÉ : Pour corriger les transactions non comptabilisées
+  const recalculateProjectMetrics = async (projectId: string) => {
+    try {
+      console.log(`🔄 Recalcul forcé des métriques pour le projet ${projectId}`);
+
+      // Recalculer les métriques avec les données actuelles
+      const metrics = calculateProjectMetrics(projectId);
+
+      // Forcer la mise à jour en base de données
+      await projectRepository.updateProjectMetrics(projectId, metrics);
+
+      // Mettre à jour l'état local immédiatement
+      setProjects(prevProjects =>
+        prevProjects.map(project =>
+          project.id === projectId
+            ? {
+                ...project,
+                ...metrics,
+                updatedAt: new Date(),
+                // Force les nouvelles valeurs même si elles existaient
+                actualSpent: metrics.actualSpent,
+                completionPercentage: metrics.completionPercentage,
+                totalTasks: metrics.totalTasks,
+                completedTasks: metrics.completedTasks,
+                totalTransactions: metrics.totalTransactions
+              }
+            : project
+        )
+      );
+
+      console.log(`✅ Métriques recalculées avec succès:`, metrics);
+      return { success: true, metrics };
+    } catch (err) {
+      console.error('Erreur lors du recalcul des métriques:', err);
+      return { success: false, error: err };
     }
   };
 
@@ -410,6 +454,7 @@ export const useProjects = () => {
     updateProject,
     deleteProject,
     updateProjectMetrics,
+    recalculateProjectMetrics,
 
     // Category methods
     createProjectCategory,

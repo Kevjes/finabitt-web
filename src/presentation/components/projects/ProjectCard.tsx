@@ -7,14 +7,17 @@ import { formatAmount, Currency } from '@/src/shared/utils/currency';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
 import EditProjectModal from './EditProjectModal';
+import ProjectDetailsModal from './ProjectDetailsModal';
 
 interface ProjectCardProps {
   project: Project;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  const { getProjectTasks, getProjectTransactions, getProjectFinancialSummary } = useProjects();
+  const { getProjectTasks, getProjectTransactions, getProjectFinancialSummary, recalculateProjectMetrics } = useProjects();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
 
   const tasks = getProjectTasks(project.id);
   const transactions = getProjectTransactions(project.id);
@@ -53,6 +56,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     if (utilization <= 80) return 'text-green-600 dark:text-green-400';
     if (utilization <= 100) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
+  };
+
+  const handleRecalculateMetrics = async () => {
+    setIsRecalculating(true);
+    try {
+      const result = await recalculateProjectMetrics(project.id);
+      if (result.success) {
+        console.log('✅ Métriques recalculées avec succès!');
+        // Optionnel: Afficher un toast de succès
+      } else {
+        console.error('❌ Erreur lors du recalcul des métriques');
+        // Optionnel: Afficher un toast d'erreur
+      }
+    } finally {
+      setIsRecalculating(false);
+    }
   };
 
   const statusInfo = getStatusInfo(project.status);
@@ -276,6 +295,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => {
+                console.log('Opening project details modal for project:', project.name);
+                setIsDetailsModalOpen(true);
+              }}
               className="flex-1 text-xs"
             >
               💰 Budget
@@ -287,6 +310,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             >
               📊 Rapport
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRecalculateMetrics}
+              disabled={isRecalculating}
+              className="text-xs"
+              title="Recalculer les métriques du projet"
+            >
+              {isRecalculating ? '⏳' : '🔄'}
+            </Button>
           </div>
         </div>
       </Card>
@@ -296,6 +329,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         project={project}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+      />
+
+      {/* Project Details Modal */}
+      <ProjectDetailsModal
+        project={project}
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
       />
     </>
   );

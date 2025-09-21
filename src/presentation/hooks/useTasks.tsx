@@ -9,7 +9,7 @@ import { Task, TaskCategory, TaskTimeEntry, StatusHistoryEntry } from '@/src/sha
 const taskRepository = new TaskRepository();
 const financeRepository = new FinanceRepository();
 
-export const useTasks = () => {
+export const useTasks = (onTransactionUpdated?: (transactionId: string, updates: any) => void) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<TaskCategory[]>([]);
@@ -101,16 +101,11 @@ export const useTasks = () => {
         )
       );
 
-      // Pour les changements de statut, on veut être sûr que l'UI se met à jour immédiatement
-      if (updates.status || updates.completedAt) {
-        // Force un re-render immédiat
-        await loadTasks();
-      }
-
       return true;
     } catch (err) {
       setError('Erreur lors de la mise à jour de la tâche');
       console.error('Error updating task:', err);
+      // En cas d'erreur, recharger les données depuis la base
       await loadTasks();
       return false;
     }
@@ -146,7 +141,12 @@ export const useTasks = () => {
       ? currentTask.statusHistory[currentTask.statusHistory.length - 1].timestamp
       : currentTask.createdAt;
 
-    const durationInCurrentStatus = Math.floor((now.getTime() - lastStatusChange.getTime()) / (1000 * 60)); // en minutes
+    // S'assurer que lastStatusChange est bien un objet Date
+    const lastChangeDate = lastStatusChange instanceof Date
+      ? lastStatusChange
+      : new Date(lastStatusChange);
+
+    const durationInCurrentStatus = Math.floor((now.getTime() - lastChangeDate.getTime()) / (1000 * 60)); // en minutes
 
     // Créer la nouvelle entrée d'historique
     const newHistoryEntry: StatusHistoryEntry = {
@@ -173,8 +173,12 @@ export const useTasks = () => {
     }
 
     // Calculer le temps total de création à completion si la tâche est terminée
+    const createdAtDate = currentTask.createdAt instanceof Date
+      ? currentTask.createdAt
+      : new Date(currentTask.createdAt);
+
     const timeToComplete = status === 'completed'
-      ? Math.floor((now.getTime() - currentTask.createdAt.getTime()) / (1000 * 60))
+      ? Math.floor((now.getTime() - createdAtDate.getTime()) / (1000 * 60))
       : currentTask.timeToComplete;
 
     const updates: Partial<Task> = {
@@ -183,15 +187,40 @@ export const useTasks = () => {
       timeInTodo,
       timeInProgress,
       timeToComplete,
+      updatedAt: now,
       ...(status === 'completed' && { completedAt: now })
     };
 
-    // 🔥 SYNCHRONISATION AUTOMATIQUE : Tâche terminée → Confirmer transaction liée
-    if (status === 'completed' && currentTask.transactionId) {
-      await confirmLinkedTransaction(currentTask.transactionId, currentTask);
-    }
+    // 🔥 Mettre à jour l'état local IMMÉDIATEMENT pour l'UI
+    const updatedTask = { ...currentTask, ...updates };
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? updatedTask : task
+      )
+    );
 
-    return await updateTask(taskId, updates);
+    try {
+      // Ensuite mettre à jour en base de données
+      await taskRepository.updateTask(taskId, updates);
+
+      // 🔥 SYNCHRONISATION AUTOMATIQUE : Tâche terminée → Confirmer transaction liée
+      if (status === 'completed' && currentTask.transactionId) {
+        await confirmLinkedTransaction(currentTask.transactionId, currentTask, onTransactionUpdated);
+      }
+
+      return true;
+    } catch (err) {
+      // En cas d'erreur, revenir à l'état précédent
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? currentTask : task
+        )
+      );
+
+      setError('Erreur lors de la mise à jour du statut de la tâche');
+      console.error('Error updating task status:', err);
+      return false;
+    }
   };
 
   const getTasksByStatus = (status: Task['status']) => {
@@ -338,7 +367,11 @@ export const useTasks = () => {
       const currentEntry = timeEntries.find(entry => entry.id === entryId);
 
       if (currentEntry && currentEntry.startTime) {
-        const duration = Math.floor((endTime.getTime() - currentEntry.startTime.getTime()) / (1000 * 60)); // in minutes
+        const startTimeDate = currentEntry.startTime instanceof Date
+          ? currentEntry.startTime
+          : new Date(currentEntry.startTime);
+
+        const duration = Math.floor((endTime.getTime() - startTimeDate.getTime()) / (1000 * 60)); // in minutes
 
         await taskRepository.stopTimeEntry(entryId, endTime, duration);
 
@@ -369,7 +402,7 @@ export const useTasks = () => {
     }
   };
 
-  const confirmLinkedTransaction = async (transactionId: string, task: Task) => {
+  const confirmLinkedTransaction = async (transactionId: string, task: Task, onTransactionUpdated?: (transactionId: string, updates: any) => void) => {
     try {
       const updatedTransaction = {
         status: 'completed' as const,
@@ -379,14 +412,26 @@ export const useTasks = () => {
 
       await financeRepository.updateTransaction(transactionId, updatedTransaction);
 
+      // Si un callback est fourni, l'appeler pour mettre à jour l'état local
+      if (onTransactionUpdated) {
+        onTransactionUpdated(transactionId, updatedTransaction);
+      }
+
       console.log(`✅ Transaction ${transactionId} confirmée automatiquement pour la tâche: ${task.title}`);
 
       // Si la tâche a un impact financier estimé, on peut mettre à jour le montant réel
       if (task.estimatedCost && task.estimatedCost > 0) {
-        await financeRepository.updateTransaction(transactionId, {
+        const additionalUpdates = {
           amount: task.estimatedCost,
           description: `Transaction confirmée automatiquement suite à la completion de la tâche: ${task.title} - Montant basé sur le coût estimé de la tâche.`
-        });
+        };
+
+        await financeRepository.updateTransaction(transactionId, additionalUpdates);
+
+        // Mettre à jour l'état local avec les nouvelles valeurs aussi
+        if (onTransactionUpdated) {
+          onTransactionUpdated(transactionId, { ...updatedTransaction, ...additionalUpdates });
+        }
       }
 
     } catch (error) {
