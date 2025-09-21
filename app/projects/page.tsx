@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuth } from '@/src/presentation/hooks/useAuth';
 import { ProtectedRoute } from '@/src/presentation/components/auth/ProtectedRoute';
 import ProjectsPage from '@/src/presentation/components/projects/ProjectsPage';
 

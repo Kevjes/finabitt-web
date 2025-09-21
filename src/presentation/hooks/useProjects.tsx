@@ -5,7 +5,7 @@ import { useAuth } from './useAuth';
 import { useFinance } from './useFinance';
 import { useTasks } from './useTasks';
 import { ProjectRepository } from '@/src/data/repositories/projectRepository';
-import { Project, ProjectCategory, ProjectBudget, Budget, Transaction, Task } from '@/src/shared/types';
+import { Project, ProjectCategory, ProjectBudget, Budget } from '@/src/shared/types';
 
 const projectRepository = new ProjectRepository();
 
@@ -14,7 +14,7 @@ export const useProjects = () => {
   const { budgets, transactions, updateTransaction } = useFinance();
 
   // Créer une fonction wrapper pour mettre à jour les transactions
-  const handleTransactionUpdate = (transactionId: string, updates: any) => {
+  const handleTransactionUpdate = (transactionId: string, updates: Record<string, unknown>) => {
     updateTransaction(transactionId, updates);
   };
 

@@ -18,11 +18,10 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { getProjectTransactions, getProjectFinancialSummary, recalculateProjectMetrics } = useProjects();
+  const { getProjectTransactions, recalculateProjectMetrics } = useProjects();
   const [isRecalculating, setIsRecalculating] = useState(false);
 
   const transactions = getProjectTransactions(project.id);
-  const financialSummary = getProjectFinancialSummary(project.id);
 
   // Filtrer seulement les transactions de dépenses
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
@@ -78,7 +77,7 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({
               </h3>
               <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mt-1">
                 <span>{project.category}</span>
-                <span>•</span>
+                <span>&bull;</span>
                 <span>Hebdomadaire</span>
               </div>
             </div>
@@ -212,7 +211,7 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({
                               {transaction.description}
                             </div>
                             <div className="text-xs text-gray-600 dark:text-gray-400">
-                              {formatDate(transaction.date)} • {statusInfo.label}
+                              {formatDate(transaction.date)} &bull; {statusInfo.label}
                             </div>
                           </div>
                         </div>

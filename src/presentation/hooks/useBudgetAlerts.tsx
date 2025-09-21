@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { useFinance } from './useFinance';
 import { useSuggestions } from './useSuggestions';
-import { Budget, Transaction } from '@/src/shared/types';
+import { Budget } from '@/src/shared/types';
 
 interface BudgetAlert {
   budgetId: string;
@@ -26,22 +26,6 @@ export const useBudgetAlerts = () => {
   const [alerts, setAlerts] = useState<BudgetAlert[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Calculer les dépenses par catégorie pour le mois en cours
-  const calculateCategorySpending = (category: string): number => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    return transactions
-      .filter(transaction =>
-        transaction.type === 'expense' &&
-        transaction.category === category &&
-        transaction.date >= startOfMonth &&
-        transaction.date <= endOfMonth &&
-        transaction.status === 'completed'
-      )
-      .reduce((total, transaction) => total + transaction.amount, 0);
-  };
 
   // Générer des suggestions de compensation
   const generateCompensationSuggestions = (alert: BudgetAlert): string[] => {
@@ -195,7 +179,6 @@ export const useBudgetAlerts = () => {
     getAlertsByCategory,
     getCriticalAlerts,
     getTotalAlertsCount,
-    calculateCategorySpending,
     refetch: analyzebudgets
   };
 };

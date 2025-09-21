@@ -9,7 +9,7 @@ import { Task, TaskCategory, TaskTimeEntry, StatusHistoryEntry } from '@/src/sha
 const taskRepository = new TaskRepository();
 const financeRepository = new FinanceRepository();
 
-export const useTasks = (onTransactionUpdated?: (transactionId: string, updates: any) => void) => {
+export const useTasks = (onTransactionUpdated?: (transactionId: string, updates: Record<string, unknown>) => void) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<TaskCategory[]>([]);
@@ -402,7 +402,7 @@ export const useTasks = (onTransactionUpdated?: (transactionId: string, updates:
     }
   };
 
-  const confirmLinkedTransaction = async (transactionId: string, task: Task, onTransactionUpdated?: (transactionId: string, updates: any) => void) => {
+  const confirmLinkedTransaction = async (transactionId: string, task: Task, onTransactionUpdated?: (transactionId: string, updates: Record<string, unknown>) => void) => {
     try {
       const updatedTransaction = {
         status: 'completed' as const,
