@@ -3,15 +3,20 @@
 import { useState } from 'react';
 import { Budget } from '@/src/shared/types';
 import { formatAmount } from '@/src/shared/utils/currency';
+import { useFinance } from '@/src/presentation/hooks/useFinance';
 import Card from '@/src/presentation/components/ui/Card';
 import Button from '@/src/presentation/components/ui/Button';
+import BudgetHistoryModal from './BudgetHistoryModal';
 
 interface BudgetCardProps {
   budget: Budget;
 }
 
 const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
+  const { stopBudgetRecurrence, startBudgetRecurrence } = useFinance();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isTogglingRecurrence, setIsTogglingRecurrence] = useState(false);
 
   const getProgressPercentage = () => {
     return Math.min((budget.spent / budget.amount) * 100, 100);
@@ -40,7 +45,8 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
       weekly: 'Hebdomadaire',
       monthly: 'Mensuel',
       quarterly: 'Trimestriel',
-      yearly: 'Annuel'
+      yearly: 'Annuel',
+      custom: 'Personnalisé'
     };
     return periods[period];
   };
@@ -69,6 +75,21 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
     return { text: 'Budget en cours', color: 'text-green-600 dark:text-green-400', icon: '✅' };
   };
 
+  const handleToggleRecurrence = async () => {
+    setIsTogglingRecurrence(true);
+    try {
+      if (budget.isRecurring) {
+        await stopBudgetRecurrence(budget.id);
+      } else {
+        await startBudgetRecurrence(budget.id);
+      }
+    } catch (error) {
+      console.error('Error toggling budget recurrence:', error);
+    } finally {
+      setIsTogglingRecurrence(false);
+    }
+  };
+
   const remainingAmount = budget.amount - budget.spent;
   const daysRemaining = getDaysRemaining();
   const status = getBudgetStatus();
@@ -85,6 +106,11 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
             </h3>
             <p className="text-sm text-gray-500">
               {budget.category} • {formatPeriod(budget.period)}
+              {budget.isRecurring && (
+                <span className="ml-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                  🔄 Récurrent
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -194,23 +220,60 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget }) => {
         )}
 
         {/* Actions rapides */}
-        <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs"
-          >
-            📊 Voir détails
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs"
-          >
-            📝 Ajouter dépense
-          </Button>
+        <div className="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+            >
+              📊 Voir détails
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+            >
+              📝 Ajouter dépense
+            </Button>
+          </div>
+
+          <div className="flex gap-2">
+            {budget.totalPeriodsCompleted > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsHistoryModalOpen(true)}
+                className="flex-1 text-xs"
+              >
+                📈 Historique
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleRecurrence}
+              disabled={isTogglingRecurrence}
+              className="flex-1 text-xs"
+            >
+              {isTogglingRecurrence ? (
+                <span className="animate-spin">⏳</span>
+              ) : budget.isRecurring ? (
+                '🔄 Arrêter récurrence'
+              ) : (
+                '🔄 Activer récurrence'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <BudgetHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        budget={budget}
+      />
     </Card>
   );
 };

@@ -155,11 +155,12 @@ export class FinanceRepository {
     const q = query(
       collection(db, this.transactionsCollection),
       where('userId', '==', userId),
-      orderBy('date', 'desc')
+      orderBy('date', 'desc'),
+      orderBy('createdAt', 'desc')
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    const transactions = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       date: doc.data().date.toDate(),
@@ -167,6 +168,28 @@ export class FinanceRepository {
       createdAt: doc.data().createdAt.toDate(),
       updatedAt: doc.data().updatedAt.toDate()
     } as Transaction));
+
+    // Tri personnalisé combinant date et heure
+    return transactions.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+
+      // Comparer d'abord les dates
+      const dateDiff = dateB.getTime() - dateA.getTime();
+      if (dateDiff !== 0) return dateDiff;
+
+      // Si même date, comparer les heures
+      if (a.time && b.time) {
+        const [hoursA, minutesA] = a.time.split(':').map(Number);
+        const [hoursB, minutesB] = b.time.split(':').map(Number);
+        const timeA = hoursA * 60 + minutesA;
+        const timeB = hoursB * 60 + minutesB;
+        return timeB - timeA; // Plus récent en premier
+      }
+
+      // Si pas d'heure, utiliser createdAt
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   }
 
   async getTransactionsByAccount(accountId: string): Promise<Transaction[]> {
@@ -255,6 +278,24 @@ export class FinanceRepository {
       updatedAt: Timestamp.now()
     });
     await updateDoc(budgetRef, cleanedUpdates);
+  }
+
+  async getBudgetById(budgetId: string): Promise<Budget | null> {
+    const budgetRef = doc(db, this.budgetsCollection, budgetId);
+    const docSnap = await getDoc(budgetRef);
+
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+        startDate: docSnap.data().startDate.toDate(),
+        endDate: docSnap.data().endDate.toDate(),
+        createdAt: docSnap.data().createdAt.toDate(),
+        updatedAt: docSnap.data().updatedAt.toDate()
+      } as Budget;
+    }
+
+    return null;
   }
 
   async deleteBudget(budgetId: string): Promise<void> {

@@ -89,6 +89,7 @@ export interface Task {
   parentTaskId?: string; // for subtasks
   habitId?: string; // link to associated habit
   transactionId?: string; // link to associated transaction
+  projectId?: string; // link to associated project
   // Finance integration
   hasFinancialImpact?: boolean; // Si la tâche a un impact financier
   estimatedCost?: number; // Coût estimé de la tâche
@@ -189,12 +190,14 @@ export interface Transaction {
   destinationAccountId?: string; // Pour les revenus et virements
   linkedTaskId?: string; // Lien avec module tâches
   linkedBudgetId?: string; // Lien avec un budget spécifique
+  projectId?: string; // Lien avec un projet
   tags?: string[];
   receipt?: string; // URL du reçu/justificatif
   location?: string; // Lieu de la transaction
   isRecurring: boolean;
   recurringPattern?: RecurringPattern;
   date: Date;
+  time?: string; // Heure de la transaction au format HH:MM
   scheduledDate?: Date; // Pour les transactions programmées
   createdAt: Date;
   updatedAt: Date;
@@ -221,13 +224,31 @@ export interface Budget {
   category: string;
   amount: number;
   spent: number;
-  period: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  period: 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
   startDate: Date;
   endDate: Date;
   alertThreshold: number; // Pourcentage pour alerte (ex: 80%)
+  isRecurring: boolean; // Si le budget se renouvelle automatiquement
   isActive: boolean;
+  // Données pour l'historique et la récurrence
+  parentBudgetId?: string; // ID du budget parent si c'est une récurrence
+  currentPeriod: number; // Numéro de la période actuelle (1, 2, 3...)
+  totalPeriodsCompleted: number; // Nombre de périodes terminées
+  recurringHistory?: BudgetPeriodHistory[]; // Historique des périodes précédentes
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface BudgetPeriodHistory {
+  periodNumber: number;
+  startDate: Date;
+  endDate: Date;
+  budgetedAmount: number;
+  spentAmount: number;
+  utilizationPercentage: number;
+  status: 'completed' | 'exceeded' | 'under_utilized';
+  transactionCount: number;
+  completedAt: Date;
 }
 
 export interface Goal {
@@ -396,5 +417,89 @@ export interface PerformanceReport {
     date: Date;
     tasksCompleted: number;
     timeSpent: number;
+  }[];
+}
+
+// Project types
+export interface Project {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  category: string;
+  color?: string;
+  icon?: string;
+  status: 'active' | 'on_hold' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high';
+  startDate?: Date;
+  endDate?: Date;
+  estimatedBudget?: number;
+  actualSpent: number;
+  budgetIds: string[]; // Budgets associés au projet
+  goalIds: string[]; // Objectifs financiers liés au projet
+  tags?: string[];
+  // Métriques du projet
+  completionPercentage: number;
+  totalTasks: number;
+  completedTasks: number;
+  totalTransactions: number;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProjectCategory {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  color: string;
+  icon?: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface ProjectBudget {
+  id: string;
+  projectId: string;
+  budgetId: string;
+  allocatedAmount: number;
+  spentAmount: number;
+  createdAt: Date;
+}
+
+export interface ProjectReport {
+  projectId: string;
+  projectName: string;
+  period: 'week' | 'month' | 'quarter' | 'year' | 'all_time';
+  startDate: Date;
+  endDate: Date;
+  financialSummary: {
+    budgetTotal: number;
+    actualSpent: number;
+    budgetVariance: number;
+    budgetVariancePercentage: number;
+    transactionCount: number;
+    averageTransactionAmount: number;
+  };
+  taskSummary: {
+    totalTasks: number;
+    completedTasks: number;
+    pendingTasks: number;
+    inProgressTasks: number;
+    completionRate: number;
+    averageTaskDuration: number;
+  };
+  categoryBreakdown: {
+    category: string;
+    budgeted: number;
+    spent: number;
+    taskCount: number;
+  }[];
+  timelineEvents: {
+    date: Date;
+    type: 'task_completed' | 'transaction_added' | 'budget_allocated' | 'milestone_reached';
+    description: string;
+    amount?: number;
   }[];
 }

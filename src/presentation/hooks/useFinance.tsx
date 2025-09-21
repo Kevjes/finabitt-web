@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { FinanceRepository } from '@/src/data/repositories/financeRepository';
-import { Account, Transaction, TransactionCategory, Budget, Goal } from '@/src/shared/types';
+import { BudgetRecurrenceService } from '@/src/domain/services/budgetRecurrenceService';
+import { Account, Transaction, TransactionCategory, Budget, Goal, BudgetPeriodHistory } from '@/src/shared/types';
 import { useAccountRules } from './useAccountRules';
 
 const financeRepository = new FinanceRepository();
+const budgetRecurrenceService = new BudgetRecurrenceService();
 
 export const useFinance = () => {
   const { user } = useAuth();
@@ -56,6 +58,10 @@ export const useFinance = () => {
 
   useEffect(() => {
     loadFinanceData();
+    // Vérifier et renouveler les budgets récurrents expirés
+    if (user) {
+      checkExpiredBudgets();
+    }
   }, [user]);
 
   // ===== COMPTES =====
@@ -487,6 +493,82 @@ export const useFinance = () => {
     }));
   };
 
+  // ===== RÉCURRENCE DES BUDGETS =====
+  const checkExpiredBudgets = async () => {
+    if (!user) return;
+
+    try {
+      const result = await budgetRecurrenceService.checkAndRenewExpiredBudgets(user.id);
+
+      if (result.renewed.length > 0) {
+        console.log(`${result.renewed.length} budgets récurrents renouvelés`);
+        // Recharger les données pour afficher les budgets renouvelés
+        await loadFinanceData();
+      }
+
+      if (result.errors.length > 0) {
+        console.error('Erreurs lors du renouvellement des budgets:', result.errors);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification des budgets expirés:', error);
+    }
+  };
+
+  const getBudgetHistory = async (budgetId: string): Promise<BudgetPeriodHistory[]> => {
+    try {
+      return await budgetRecurrenceService.getBudgetHistory(budgetId);
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'historique du budget:', error);
+      return [];
+    }
+  };
+
+  const getBudgetStatistics = (budget: Budget) => {
+    return budgetRecurrenceService.calculateBudgetStatistics(budget);
+  };
+
+  const stopBudgetRecurrence = async (budgetId: string) => {
+    try {
+      await budgetRecurrenceService.stopBudgetRecurrence(budgetId);
+
+      // Mettre à jour l'état local
+      setBudgets(prevBudgets =>
+        prevBudgets.map(budget =>
+          budget.id === budgetId
+            ? { ...budget, isRecurring: false, updatedAt: new Date() }
+            : budget
+        )
+      );
+
+      return true;
+    } catch (error) {
+      setError('Erreur lors de l\'arrêt de la récurrence du budget');
+      console.error('Error stopping budget recurrence:', error);
+      return false;
+    }
+  };
+
+  const startBudgetRecurrence = async (budgetId: string) => {
+    try {
+      await budgetRecurrenceService.startBudgetRecurrence(budgetId);
+
+      // Mettre à jour l'état local
+      setBudgets(prevBudgets =>
+        prevBudgets.map(budget =>
+          budget.id === budgetId
+            ? { ...budget, isRecurring: true, updatedAt: new Date() }
+            : budget
+        )
+      );
+
+      return true;
+    } catch (error) {
+      setError('Erreur lors de l\'activation de la récurrence du budget');
+      console.error('Error starting budget recurrence:', error);
+      return false;
+    }
+  };
+
   return {
     // Data
     accounts,
@@ -514,6 +596,11 @@ export const useFinance = () => {
     createBudget,
     updateBudget,
     deleteBudget,
+    getBudgetHistory,
+    getBudgetStatistics,
+    stopBudgetRecurrence,
+    startBudgetRecurrence,
+    checkExpiredBudgets,
 
     // Goal methods
     createGoal,

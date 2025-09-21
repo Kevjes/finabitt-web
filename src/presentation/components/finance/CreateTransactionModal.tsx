@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Transaction, TransactionCategory } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
 import { useTasks } from '@/src/presentation/hooks/useTasks';
+import { useProjects } from '@/src/presentation/hooks/useProjects';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
@@ -22,6 +23,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
 }) => {
   const { accounts, categories, budgets, createTransaction, createCategory, error } = useFinance();
   const { tasks } = useTasks();
+  const { getActiveProjects } = useProjects();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,9 +36,11 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
     destinationAccountId: '',
     linkedTaskId: '',
     linkedBudgetId: '',
+    projectId: '',
     tags: [] as string[],
     location: '',
     date: new Date().toISOString().split('T')[0],
+    time: new Date().toTimeString().slice(0, 5), // HH:MM format
     status: 'completed' as Transaction['status'],
     isRecurring: false
   });
@@ -67,7 +71,8 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   const getAccountOptions = () => {
     return accounts.map(account => ({
       value: account.id,
-      label: `${account.name} (${account.currentBalance.toFixed(0)} FCFA)`
+      label: `${account.name} (${account.currentBalance.toFixed(0)} FCFA)`,
+      key: `create-account-${account.id}`
     }));
   };
 
@@ -131,9 +136,11 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
         destinationAccountId: formData.destinationAccountId || undefined,
         linkedTaskId: formData.linkedTaskId || undefined,
         linkedBudgetId: formData.linkedBudgetId || undefined,
+        projectId: formData.projectId || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         location: formData.location.trim() || undefined,
         date: new Date(formData.date),
+        time: formData.time || undefined,
         isRecurring: formData.isRecurring
       };
 
@@ -149,9 +156,11 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           destinationAccountId: '',
           linkedTaskId: '',
           linkedBudgetId: '',
+          projectId: '',
           tags: [],
           location: '',
           date: new Date().toISOString().split('T')[0],
+          time: new Date().toTimeString().slice(0, 5),
           status: 'completed',
           isRecurring: false
         });
@@ -163,29 +172,37 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
   };
 
   const categoryOptions = [
-    { value: '', label: 'Sélectionner une catégorie...' },
-    ...getFilteredCategories().map(cat => ({
+    { value: '', label: 'Sélectionner une catégorie...', key: 'empty-cat' },
+    ...getFilteredCategories().map((cat, index) => ({
       value: cat.name,
-      label: cat.name
+      label: cat.name,
+      key: `create-cat-${cat.id || index}`
     })),
-    { value: '__create_new__', label: '+ Créer une nouvelle catégorie' }
+    { value: '__create_new__', label: '+ Créer une nouvelle catégorie', key: 'create-new-cat' }
   ];
 
   const subcategoryOptions = [
-    { value: '', label: 'Aucune sous-catégorie' },
-    ...getAvailableSubcategories().map(sub => ({
+    { value: '', label: 'Aucune sous-catégorie', key: 'empty-subcat' },
+    ...getAvailableSubcategories().map((sub, index) => ({
       value: sub,
-      label: sub
+      label: sub,
+      key: `create-subcat-${formData.category}-${index}`
     }))
   ];
 
   const accountOptions = getAccountOptions();
 
   const taskOptions = [
-    { value: '', label: 'Aucune tâche liée' },
+    { value: '', label: 'Aucune tâche liée', key: 'empty-task' },
     ...tasks
       .filter(task => task.status !== 'completed' && task.status !== 'cancelled')
-      .map(task => ({ value: task.id, label: task.title }))
+      .map(task => ({ value: task.id, label: task.title, key: `create-task-${task.id}` }))
+  ];
+
+  const activeProjects = getActiveProjects();
+  const projectOptions = [
+    { value: '', label: 'Aucun projet lié', key: 'empty-project' },
+    ...activeProjects.map(project => ({ value: project.id, label: project.name, key: `create-project-${project.id}` }))
   ];
 
   return (
@@ -238,7 +255,7 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
         </div>
 
         {/* Informations de base */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Montant
@@ -264,6 +281,14 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
             value={formData.date}
             onChange={(value) => setFormData({ ...formData, date: value })}
             required
+          />
+
+          <Input
+            label="Heure"
+            type="time"
+            value={formData.time}
+            onChange={(value) => setFormData({ ...formData, time: value })}
+            helperText="Heure de la transaction"
           />
         </div>
 
@@ -374,6 +399,15 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
           helperText="Associer cette transaction à une tâche en cours"
         />
 
+        {/* Liaison avec projet */}
+        <Select
+          label="Projet associé (optionnel)"
+          value={formData.projectId}
+          onChange={(value) => setFormData({ ...formData, projectId: value })}
+          options={projectOptions}
+          helperText="Associer cette transaction à un projet pour un meilleur suivi"
+        />
+
         {/* Liaison avec budget - seulement pour les dépenses */}
         {formData.type === 'expense' && (
           <Select
@@ -381,12 +415,13 @@ const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({
             value={formData.linkedBudgetId}
             onChange={(value) => setFormData({ ...formData, linkedBudgetId: value })}
             options={[
-              { value: '', label: 'Aucun budget' },
+              { value: '', label: 'Aucun budget', key: 'empty-budget' },
               ...budgets
                 .filter(budget => budget.isActive)
                 .map(budget => ({
                   value: budget.id,
-                  label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`
+                  label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`,
+                  key: `create-budget-${budget.id}`
                 }))
             ]}
             helperText={`Décompter cette dépense d'un budget spécifique (${budgets.filter(b => b.isActive).length} budgets disponibles)`}

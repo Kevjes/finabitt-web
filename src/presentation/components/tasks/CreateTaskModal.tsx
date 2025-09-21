@@ -5,6 +5,7 @@ import { Task, TaskCategory } from '@/src/shared/types';
 import { useTasks } from '@/src/presentation/hooks/useTasks';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { useProjects } from '@/src/presentation/hooks/useProjects';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Textarea from '@/src/presentation/components/ui/Textarea';
@@ -26,6 +27,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const { createTask, categories, createCategory, error: taskError } = useTasks();
   const { habits } = useHabits();
   const { transactions } = useFinance();
+  const { getActiveProjects } = useProjects();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -39,6 +41,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     isRecurring: false,
     habitId: '',
     transactionId: '',
+    projectId: '',
     hasFinancialImpact: false,
     estimatedCost: ''
   });
@@ -67,6 +70,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         isRecurring: false,
         habitId: '',
         transactionId: '',
+        projectId: '',
         hasFinancialImpact: false,
         estimatedCost: ''
       });
@@ -111,6 +115,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         isRecurring: formData.isRecurring,
         habitId: formData.habitId || undefined,
         transactionId: formData.transactionId || undefined,
+        projectId: formData.projectId || undefined,
         hasFinancialImpact: formData.hasFinancialImpact,
         estimatedCost: formData.estimatedCost ? Number(formData.estimatedCost) : undefined
       };
@@ -176,6 +181,12 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     ...transactions
       .filter(transaction => transaction.status === 'pending')
       .map(transaction => ({ value: transaction.id, label: `${transaction.description} (${transaction.amount} FCFA)` }))
+  ];
+
+  const activeProjects = getActiveProjects();
+  const projectOptions = [
+    { value: '', label: 'Aucun projet lié' },
+    ...activeProjects.map(project => ({ value: project.id, label: project.name }))
   ];
 
   return (
@@ -314,6 +325,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           onChange={(value) => setFormData({ ...formData, transactionId: value })}
           options={transactionOptions}
           helperText="Lier cette tâche à une transaction en attente (sera confirmée automatiquement à la completion)"
+        />
+
+        <Select
+          label="Projet associé"
+          value={formData.projectId}
+          onChange={(value) => setFormData({ ...formData, projectId: value })}
+          options={projectOptions}
+          helperText="Associer cette tâche à un projet pour un meilleur suivi"
         />
 
         <div className="flex items-center gap-2">

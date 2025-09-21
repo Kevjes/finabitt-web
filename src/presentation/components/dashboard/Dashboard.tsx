@@ -4,6 +4,7 @@ import { useAuth } from '@/src/presentation/hooks/useAuth';
 import { useHabits } from '@/src/presentation/hooks/useHabits';
 import { useTasks } from '@/src/presentation/hooks/useTasks';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { useProjects } from '@/src/presentation/hooks/useProjects';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import ThemeToggle from '@/src/presentation/components/ui/ThemeToggle';
@@ -16,6 +17,7 @@ const Dashboard: React.FC = () => {
   const { habits, loading: habitsLoading } = useHabits();
   const { tasks, loading: tasksLoading } = useTasks();
   const { accounts, getTotalBalance, getMonthlyIncome, loading: financeLoading } = useFinance();
+  const { projects, loading: projectsLoading } = useProjects();
 
   const handleLogout = async () => {
     try {
@@ -57,7 +59,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Habitudes Card */}
           <Card shadow="lg" className="cursor-pointer hover:shadow-xl transition-shadow" onClick={() => window.location.href = '/habits'}>
             <div className="flex items-center justify-between mb-4">
@@ -144,6 +146,35 @@ const Dashboard: React.FC = () => {
               )}
             </div>
           </Card>
+
+          {/* Projets Card */}
+          <Card shadow="lg" className="cursor-pointer hover:shadow-xl transition-shadow" onClick={() => window.location.href = '/projects'}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Projets</h3>
+              <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Total</span>
+                <span className="font-medium">{projectsLoading ? '...' : projects.filter(p => !p.isArchived).length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Actifs</span>
+                <span className="font-medium text-primary">{projectsLoading ? '...' : projects.filter(p => p.status === 'active' && !p.isArchived).length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Terminés</span>
+                <span className="font-medium text-success">{projectsLoading ? '...' : projects.filter(p => p.status === 'completed').length}</span>
+              </div>
+              {projects.filter(p => !p.isArchived).length === 0 && !projectsLoading && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 pt-2">Cliquez pour créer votre premier projet</p>
+              )}
+            </div>
+          </Card>
         </div>
 
         {/* Widgets avancés */}
@@ -158,7 +189,7 @@ const Dashboard: React.FC = () => {
         {/* Quick Actions */}
         <Card shadow="lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Actions rapides</h3>
-          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-7 gap-3">
             <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/habits'}>
               <div className="w-5 h-5 mb-1 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">+</span>
@@ -188,6 +219,12 @@ const Dashboard: React.FC = () => {
                 <span className="text-white text-xs font-bold">🏆</span>
               </div>
               <span className="text-xs">Achievements</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/projects'}>
+              <div className="w-5 h-5 mb-1 bg-purple-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">📋</span>
+              </div>
+              <span className="text-xs">Nouveau projet</span>
             </Button>
             <Button variant="outline" size="sm" className="h-auto py-3 flex-col" onClick={() => window.location.href = '/productivity/insights'}>
               <div className="w-5 h-5 mb-1 bg-pink-500 rounded-full flex items-center justify-center">

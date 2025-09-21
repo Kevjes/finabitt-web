@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Budget } from '@/src/shared/types';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
+import { calculateBudgetDates } from '@/src/shared/utils/budgetUtils';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Select from '@/src/presentation/components/ui/Select';
@@ -25,17 +26,30 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
     amount: 0,
     period: 'monthly' as Budget['period'],
     alertThreshold: 80,
-    customPeriod: {
-      startDate: '',
-      endDate: ''
-    }
+    isRecurring: false,
+    startDate: '',
+    endDate: '',
+    isCustomDates: false
   });
+
+  // Calculer automatiquement les dates quand la période change
+  useEffect(() => {
+    if (formData.period !== 'custom' && !formData.isCustomDates) {
+      const { startDate, endDate } = calculateBudgetDates(formData.period);
+      setFormData(prev => ({
+        ...prev,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+      }));
+    }
+  }, [formData.period, formData.isCustomDates]);
 
   const periodOptions = [
     { value: 'weekly', label: 'Hebdomadaire' },
     { value: 'monthly', label: 'Mensuel' },
     { value: 'quarterly', label: 'Trimestriel' },
-    { value: 'yearly', label: 'Annuel' }
+    { value: 'yearly', label: 'Annuel' },
+    { value: 'custom', label: 'Personnalisé' }
   ];
 
   const thresholdOptions = [
@@ -49,55 +63,38 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
     return categories.filter(cat => cat.type === 'expense');
   };
 
-  const calculateDates = (period: Budget['period']) => {
-    const now = new Date();
-    let startDate: Date;
-    let endDate: Date;
+  const handleCustomStartDateChange = (value: string) => {
+    setFormData(prev => ({ ...prev, startDate: value }));
 
-    switch (period) {
-      case 'weekly':
-        startDate = new Date(now);
-        startDate.setDate(now.getDate() - now.getDay()); // Début de semaine (dimanche)
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 6); // Fin de semaine (samedi)
-        break;
-      case 'monthly':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        break;
-      case 'quarterly':
-        const quarterStart = Math.floor(now.getMonth() / 3) * 3;
-        startDate = new Date(now.getFullYear(), quarterStart, 1);
-        endDate = new Date(now.getFullYear(), quarterStart + 3, 0);
-        break;
-      case 'yearly':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear(), 11, 31);
-        break;
-      default:
-        startDate = now;
-        endDate = now;
+    // Recalculer la date de fin si c'est une période prédéfinie
+    if (formData.period !== 'custom' && value) {
+      const startDate = new Date(value);
+      const { endDate } = calculateBudgetDates(formData.period, startDate);
+      setFormData(current => ({
+        ...current,
+        endDate: endDate.toISOString().split('T')[0]
+      }));
     }
-
-    return { startDate, endDate };
   };
 
   const handleSubmit = async () => {
     if (!formData.name.trim() || !formData.category || formData.amount <= 0) return;
+    if (!formData.startDate || !formData.endDate) return;
 
     setIsSubmitting(true);
     try {
-      const dates = calculateDates(formData.period);
-
       const budgetData: Omit<Budget, 'id' | 'userId' | 'createdAt' | 'updatedAt'> = {
         name: formData.name.trim(),
         category: formData.category,
         amount: formData.amount,
         spent: 0,
         period: formData.period,
-        startDate: dates.startDate,
-        endDate: dates.endDate,
+        startDate: new Date(formData.startDate),
+        endDate: new Date(formData.endDate),
         alertThreshold: formData.alertThreshold,
+        isRecurring: formData.isRecurring,
+        currentPeriod: 1,
+        totalPeriodsCompleted: 0,
         isActive: true
       };
 
@@ -109,10 +106,10 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
           amount: 0,
           period: 'monthly',
           alertThreshold: 80,
-          customPeriod: {
-            startDate: '',
-            endDate: ''
-          }
+          isRecurring: false,
+          startDate: '',
+          endDate: '',
+          isCustomDates: false
         });
         onClose();
       }
@@ -130,14 +127,17 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
   ];
 
   const getPreviewDates = () => {
-    const dates = calculateDates(formData.period);
-    return {
-      start: dates.startDate.toLocaleDateString('fr-FR'),
-      end: dates.endDate.toLocaleDateString('fr-FR')
-    };
+    if (formData.startDate && formData.endDate) {
+      return {
+        start: new Date(formData.startDate).toLocaleDateString('fr-FR'),
+        end: new Date(formData.endDate).toLocaleDateString('fr-FR')
+      };
+    }
+    return { start: '', end: '' };
   };
 
   const previewDates = getPreviewDates();
+  const isCustomPeriod = formData.period === 'custom';
 
   return (
     <Modal
@@ -194,15 +194,94 @@ const CreateBudgetModal: React.FC<CreateBudgetModalProps> = ({
             options={periodOptions}
           />
 
-          {/* Aperçu des dates */}
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Période calculée
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Du {previewDates.start} au {previewDates.end}
-            </p>
+          {/* Dates personnalisées */}
+          {isCustomPeriod && (
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Date de début"
+                type="date"
+                value={formData.startDate}
+                onChange={(value) => setFormData({ ...formData, startDate: value })}
+                required
+              />
+              <Input
+                label="Date de fin"
+                type="date"
+                value={formData.endDate}
+                onChange={(value) => setFormData({ ...formData, endDate: value })}
+                required
+              />
+            </div>
+          )}
+
+          {/* Personnalisation des dates pour les périodes prédéfinies */}
+          {!isCustomPeriod && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="checkbox"
+                  id="isCustomDates"
+                  checked={formData.isCustomDates}
+                  onChange={(e) => setFormData({ ...formData, isCustomDates: e.target.checked })}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="isCustomDates" className="text-sm text-gray-700 dark:text-gray-300">
+                  Personnaliser les dates de début/fin
+                </label>
+              </div>
+
+              {formData.isCustomDates ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Date de début personnalisée"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={handleCustomStartDateChange}
+                    required
+                  />
+                  <Input
+                    label="Date de fin (auto-calculée)"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(value) => setFormData({ ...formData, endDate: value })}
+                    required
+                  />
+                </div>
+              ) : (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Période calculée automatiquement
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Du {previewDates.start} au {previewDates.end}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Option de récurrence */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isRecurring"
+              checked={formData.isRecurring}
+              onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+              className="rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label htmlFor="isRecurring" className="text-sm text-gray-700 dark:text-gray-300">
+              Budget récurrent (se renouvelle automatiquement)
+            </label>
           </div>
+
+          {formData.isRecurring && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Budget récurrent :</strong> Ce budget se renouvellera automatiquement à la fin de chaque période.
+                L'historique des périodes précédentes sera conservé pour suivre vos performances.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Seuil d'alerte */}

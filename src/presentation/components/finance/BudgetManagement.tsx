@@ -218,7 +218,10 @@ const BudgetManagement: React.FC = () => {
                       }
                       return end;
                     })(),
-                    isActive: true
+                    isActive: true,
+                    isRecurring: editingBudget?.isRecurring || false,
+                    currentPeriod: editingBudget?.currentPeriod || 1,
+                    totalPeriodsCompleted: editingBudget?.totalPeriodsCompleted || 0
                   };
 
                   if (editingBudget) {

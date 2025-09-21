@@ -33,6 +33,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     tags: [] as string[],
     location: '',
     date: '',
+    time: '',
     status: 'completed' as Transaction['status'],
     linkedBudgetId: ''
   });
@@ -47,6 +48,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         tags: transaction.tags || [],
         location: transaction.location || '',
         date: transaction.date.toISOString().split('T')[0],
+        time: transaction.time || '',
         status: transaction.status,
         linkedBudgetId: transaction.linkedBudgetId || ''
       });
@@ -98,6 +100,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         location: formData.location.trim() || undefined,
         date: new Date(formData.date),
+        time: formData.time.trim() || undefined,
         status: formData.status,
         linkedBudgetId: formData.linkedBudgetId || undefined
       };
@@ -126,17 +129,19 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   const categoryOptions = [
     { value: '', label: 'Sélectionner une catégorie...' },
-    ...getFilteredCategories().map(cat => ({
+    ...getFilteredCategories().map((cat, index) => ({
       value: cat.name,
-      label: cat.name
+      label: cat.name,
+      key: `cat-${cat.id || index}`
     }))
   ];
 
   const subcategoryOptions = [
     { value: '', label: 'Aucune sous-catégorie' },
-    ...getAvailableSubcategories().map(sub => ({
+    ...getAvailableSubcategories().map((sub, index) => ({
       value: sub,
-      label: sub
+      label: sub,
+      key: `subcat-${formData.category}-${index}`
     }))
   ];
 
@@ -205,7 +210,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
         {/* Formulaire de modification */}
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Montant
@@ -231,6 +236,14 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               value={formData.date}
               onChange={(value) => setFormData({ ...formData, date: value })}
               required
+            />
+
+            <Input
+              label="Heure"
+              type="time"
+              value={formData.time}
+              onChange={(value) => setFormData({ ...formData, time: value })}
+              helperText="Heure de la transaction"
             />
           </div>
 
@@ -285,7 +298,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   .filter(budget => budget.isActive)
                   .map(budget => ({
                     value: budget.id,
-                    label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`
+                    label: `${budget.name} - ${budget.category} (${(budget.amount - budget.spent).toFixed(0)} FCFA restant)`,
+                    key: `budget-${budget.id}`
                   }))
               ]}
               helperText="Associer cette dépense à un budget spécifique"
