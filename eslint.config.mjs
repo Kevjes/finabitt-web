@@ -28,6 +28,11 @@ const eslintConfig = [
       "react-hooks/exhaustive-deps": "warn",
       "prefer-const": "warn",
     },
+    settings: {
+      "eslint": {
+        "maxWarnings": -1
+      }
+    },
   },
 ];
 
