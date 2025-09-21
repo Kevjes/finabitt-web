@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
 import { Budget } from '@/src/shared/types';
 import { formatAmount, DEFAULT_CURRENCY } from '@/src/shared/utils/currency';
+import { calculateBudgetDates } from '@/src/shared/utils/budgetUtils';
 import Button from '@/src/presentation/components/ui/Button';
 import Card from '@/src/presentation/components/ui/Card';
 import Input from '@/src/presentation/components/ui/Input';
@@ -24,8 +25,24 @@ const BudgetManagement: React.FC = () => {
     category: '',
     amount: 0,
     period: 'monthly' as Budget['period'],
-    alertThreshold: 80
+    alertThreshold: 80,
+    isRecurring: false,
+    startDate: '',
+    endDate: '',
+    isCustomDates: false
   });
+
+  // Calculer automatiquement les dates quand la période change
+  useEffect(() => {
+    if (formData.period !== 'custom' && !formData.isCustomDates && !editingBudget) {
+      const { startDate, endDate } = calculateBudgetDates(formData.period);
+      setFormData(prev => ({
+        ...prev,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+      }));
+    }
+  }, [formData.period, formData.isCustomDates, editingBudget]);
 
   if (loading) {
     return (
@@ -102,7 +119,11 @@ const BudgetManagement: React.FC = () => {
                         category: budget.category,
                         amount: budget.amount,
                         period: budget.period,
-                        alertThreshold: budget.alertThreshold
+                        alertThreshold: budget.alertThreshold,
+                        isRecurring: budget.isRecurring,
+                        startDate: budget.startDate.toISOString().split('T')[0],
+                        endDate: budget.endDate.toISOString().split('T')[0],
+                        isCustomDates: true // En mode édition, on considère que les dates sont personnalisées
                       });
                       setShowCreateForm(true);
                     }}
@@ -204,24 +225,13 @@ const BudgetManagement: React.FC = () => {
                     amount: Number(formData.amount),
                     alertThreshold: Number(formData.alertThreshold),
                     spent: editingBudget?.spent || 0,
-                    startDate: editingBudget?.startDate || new Date(),
-                    endDate: editingBudget?.endDate || (() => {
-                      const end = new Date();
-                      if (formData.period === 'weekly') {
-                        end.setDate(end.getDate() + 7);
-                      } else if (formData.period === 'monthly') {
-                        end.setMonth(end.getMonth() + 1);
-                      } else if (formData.period === 'quarterly') {
-                        end.setMonth(end.getMonth() + 3);
-                      } else {
-                        end.setFullYear(end.getFullYear() + 1);
-                      }
-                      return end;
-                    })(),
+                    startDate: new Date(formData.startDate),
+                    endDate: new Date(formData.endDate),
                     isActive: true,
-                    isRecurring: editingBudget?.isRecurring || false,
+                    isRecurring: formData.isRecurring,
                     currentPeriod: editingBudget?.currentPeriod || 1,
-                    totalPeriodsCompleted: editingBudget?.totalPeriodsCompleted || 0
+                    totalPeriodsCompleted: editingBudget?.totalPeriodsCompleted || 0,
+                    periodHistory: editingBudget?.periodHistory || []
                   };
 
                   if (editingBudget) {
@@ -238,7 +248,11 @@ const BudgetManagement: React.FC = () => {
                     category: '',
                     amount: 0,
                     period: 'monthly',
-                    alertThreshold: 80
+                    alertThreshold: 80,
+                    isRecurring: false,
+                    startDate: '',
+                    endDate: '',
+                    isCustomDates: false
                   });
                 } catch (err) {
                   console.error('Erreur lors de la sauvegarde:', err);
@@ -287,10 +301,79 @@ const BudgetManagement: React.FC = () => {
                       { value: 'weekly', label: 'Hebdomadaire' },
                       { value: 'monthly', label: 'Mensuel' },
                       { value: 'quarterly', label: 'Trimestriel' },
-                      { value: 'yearly', label: 'Annuel' }
+                      { value: 'yearly', label: 'Annuel' },
+                      { value: 'custom', label: 'Personnalisé' }
                     ]}
                     required
                   />
+                </div>
+
+                {/* Dates de période */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={formData.isCustomDates}
+                        onChange={(e) => setFormData({ ...formData, isCustomDates: e.target.checked })}
+                        disabled={formData.period === 'custom'}
+                        className="rounded border-gray-300 dark:border-gray-600"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        Dates personnalisées
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Date de début *"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(value) => setFormData({ ...formData, startDate: value })}
+                      disabled={!formData.isCustomDates && formData.period !== 'custom' && !editingBudget}
+                      required
+                    />
+
+                    <Input
+                      label="Date de fin *"
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(value) => setFormData({ ...formData, endDate: value })}
+                      disabled={!formData.isCustomDates && formData.period !== 'custom' && !editingBudget}
+                      required
+                    />
+                  </div>
+
+                  {!formData.isCustomDates && formData.period !== 'custom' && !editingBudget && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      💡 Les dates sont calculées automatiquement selon la période sélectionnée
+                    </div>
+                  )}
+                </div>
+
+                {/* Options de récurrence */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.isRecurring}
+                      onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Budget récurrent
+                    </span>
+                  </label>
+
+                  {formData.isRecurring && (
+                    <div className="pl-6 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <span>🔄</span>
+                        <span>Le budget se renouvellera automatiquement à la fin de chaque période</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Input
@@ -316,7 +399,11 @@ const BudgetManagement: React.FC = () => {
                         category: '',
                         amount: 0,
                         period: 'monthly',
-                        alertThreshold: 80
+                        alertThreshold: 80,
+                        isRecurring: false,
+                        startDate: '',
+                        endDate: '',
+                        isCustomDates: false
                       });
                     }}
                   >
