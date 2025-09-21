@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { useFinance } from './useFinance';
 import { useSuggestions } from './useSuggestions';
-import { Budget } from '@/src/shared/types';
 
 interface BudgetAlert {
   budgetId: string;
@@ -85,7 +84,7 @@ export const useBudgetAlerts = () => {
   };
 
   // Analyser les budgets et générer les alertes
-  const analyzebudgets = async () => {
+  const analyzebudgets = useCallback(async () => {
     if (!budgets.length) {
       setAlerts([]);
       setLoading(false);
@@ -146,7 +145,7 @@ export const useBudgetAlerts = () => {
     console.log(`🚨 ${newAlerts.length} alerte(s) générée(s) sur ${activeBudgets.length} budgets actifs`);
     setAlerts(newAlerts);
     setLoading(false);
-  };
+  }, [budgets, createSuggestion, user]);
 
   useEffect(() => {
     if (budgets.length > 0 && transactions.length > 0) {
@@ -154,7 +153,7 @@ export const useBudgetAlerts = () => {
     } else {
       setLoading(false);
     }
-  }, [budgets, transactions, user]);
+  }, [budgets, transactions, user, analyzebudgets]);
 
   const dismissAlert = (budgetId: string) => {
     setAlerts(prev => prev.filter(alert => alert.budgetId !== budgetId));

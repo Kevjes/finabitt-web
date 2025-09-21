@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useProjects } from '@/src/presentation/hooks/useProjects';
 import { useFinance } from '@/src/presentation/hooks/useFinance';
-import { Project, Budget, Goal } from '@/src/shared/types';
+import { Project } from '@/src/shared/types';
 import Modal from '@/src/presentation/components/ui/Modal';
 import Input from '@/src/presentation/components/ui/Input';
 import Textarea from '@/src/presentation/components/ui/Textarea';
